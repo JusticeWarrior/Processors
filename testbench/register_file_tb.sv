@@ -46,6 +46,55 @@ module register_file_tb;
   );
 `endif
 
+  initial begin
+    nRST = 1'b0;
+	rfif.rsel1 = '0;
+	rfif.rsel2 = '0;
+	rfif.wsel = '0;
+	rfif.wdat = '0;
+	rfif.WEN = '0;
+
+	#PERIOD;
+
+	nRST = 1'b1;
+    rfif.wsel = 'd1;
+	rfif.wdat = 32'd5;
+	rfif.WEN = 1'b1;
+	rfif.rsel1 = 'd1;
+
+	#PERIOD;
+
+	assert (rfif.rdat1 == 32'd5) else
+		$display("DIDNT SET INITIAL VALUE CORRECTLY");
+	rfif.WEN = 1'b0;
+
+	#PERIOD;
+
+	nRST = 1'b0;
+
+	#PERIOD;
+
+	nRST = 1'b1;
+	rfif.rsel1 = 'd1;
+
+	assert (rfif.rdat1 == '0) else
+		$display("DIDNT RESET CORRECTLY");
+
+	#PERIOD;
+
+	rfif.wsel = '0;
+	rfif.WEN = 1'b1;
+
+	#PERIOD;
+
+	rfif.WEN = '0;
+	assert (rfif.rdat1 == '0) else
+		$display("WROTE TO REG1 INCORRECTLY");
+
+	$display("ALL TESTS FINISHED!");
+
+  end
+
 endmodule
 
 program test;
