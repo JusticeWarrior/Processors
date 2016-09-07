@@ -23,38 +23,47 @@ module memory_control (
 	parameter CPUS = 2;
 
 	always_comb begin
-		ccif.ramstore = '0;
+		ccif.ramstore = '?;
 		ccif.ramWEN = '0;
 		ccif.ramREN = '0;
-		ccif.ramaddr = '0;
+		ccif.ramaddr = '?;
 
-		ccif.iwait = '0;
-		ccif.dwait = '0;
+		ccif.iwait = '1;
+		ccif.dwait = '1;
 		ccif.iload = ccif.ramload;
 		ccif.dload = ccif.ramload;
 
-		if (ccif.ramstate != FREE || ccif.ramstate != ERROR) begin
-			ccif.dwait = 1'b1;
-			ccif.rwait = 1'b1;
-		end
-
-		if (ccif.dWEN) begin
-			if (ccif.ramstate != FREE || ccif.ramstate != ERROR)
-				ccif.dwait = 1'b1;
-			else
-				ccif.ramWEN = 1'b1;
+		if (ccif.dWEN[0] || ccif.dWEN[1]) begin
+			ccif.ramWEN = 1'b1;
 			ccif.ramaddr = ccif.daddr;
 			ccif.ramstore = ccif.dstore;
-		end
-		else if (ccif.dREN) begin
-			if (ccif.ramstate != FREE || ccif.ramstate != ERROR) begin
-				ccif.dwait = 1'b1;
+			if (ccif.ramstate == ACCESS) begin
+				if (ccif.dWEN[0])
+					ccif.dwait[0] = '0;
+				if (ccif.dWEN[1])
+					ccif.dwait[1] = '0;
 			end
-			ccif.ramREN = ccif.dREN;
-			ccif.ramaddr = ccif.daddr;
-			ccif.ramstore = ccif.dstore;
 		end
-		else if (ccif.)
+		else if (ccif.dREN[0] || ccif.dREN[1]) begin
+			ccif.ramREN = 1'b1;
+			ccif.ramaddr = ccif.daddr;
+			if (ccif.ramstate == ACCESS) begin
+				if (ccif.dREN[0])
+					ccif.dwait[0] = '0;
+				if (ccif.dREN[1])
+					ccif.dwait[1] = '0;
+			end
+		end
+		else if (ccif.iREN[0] || ccif.iREN[1]) begin
+			ccif.ramREN = 1'b1;
+			ccif.ramaddr = ccif.iaddr;
+			if (ccif.ramstate == ACCESS) begin
+				if (ccif.iREN[0])
+					ccif.iwait[0] = '0;
+				if (ccif.iREN[1])
+					ccif.iwait[1] = '0;
+			end
+		end
 	end
 
 endmodule
