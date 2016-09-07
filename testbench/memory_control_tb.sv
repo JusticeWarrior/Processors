@@ -15,6 +15,8 @@
 
 module memory_control_tb;
 
+  import cpu_types_pkg::*;
+
   parameter PERIOD = 10;
 
   logic CLK = 0, nRST;
@@ -29,7 +31,7 @@ module memory_control_tb;
 
   // interface
   caches_if cif0();
-  caches_if_cif1();
+  caches_if cif1();
   cache_control_if #(.CPUS(1)) ccif (cif0, cif1);
   // test program
   test PROG ();
@@ -53,8 +55,97 @@ module memory_control_tb;
 
 	#PERIOD;
 
-	assert (ccif.dREN == '0) else
-		$display("DIDNT SET INITIAL VALUE CORRECTLY");
+	assert (cif0.iwait == '1) else
+		$display("1 DIDNT SET iwait VALUE CORRECTLY");
+	assert (cif0.dwait == '1) else
+		$display("1 DIDNT SET dwait VALUE CORRECTLY");
+
+	cif0.dREN = '1;
+	ccif.ramstate = BUSY;
+	cif0.daddr = 32'd5;
+
+	#PERIOD;
+
+	assert (cif0.iwait == '1) else
+		$display("2 DIDNT SET iwait VALUE CORRECTLY");
+	assert (cif0.dwait == '1) else
+		$display("2 DIDNT SET dwait VALUE CORRECTLY");
+
+	#PERIOD;
+
+	assert (cif0.iwait == '1) else
+		$display("3 DIDNT SET iwait VALUE CORRECTLY");
+	assert (cif0.dwait == '1) else
+		$display("3 DIDNT SET dwait VALUE CORRECTLY");
+
+	ccif.ramstate = ACCESS;
+	ccif.ramload = 32'd1;
+
+	#PERIOD;
+
+	assert (cif0.iwait == '1) else
+		$display("4 DIDNT SET iwait VALUE CORRECTLY");
+	assert (cif0.dwait == '0) else
+		$display("4 DIDNT SET dwait VALUE CORRECTLY");
+	assert (ccif.dload == 32'd1) else
+		$display("4 DIDNT SET dload VALUE CORRECTLY");
+
+	ccif.ramstate = FREE;
+	cif0.dREN = '0;
+
+	#PERIOD;
+
+	assert (cif0.iwait == '1) else
+		$display("5 DIDNT SET iwait VALUE CORRECTLY");
+	assert (cif0.dwait == '1) else
+		$display("5 DIDNT SET dwait VALUE CORRECTLY");
+
+	cif0.dWEN = '1;
+	cif0.iREN = '1;
+	cif0.iaddr = 32'd6;
+	ccif.ramstate = BUSY;
+	cif0.daddr = 32'd5;
+	cif0.dstore = 32'd1;
+
+	#PERIOD;
+
+	assert (cif0.iwait == '1) else
+		$display("6 DIDNT SET iwait VALUE CORRECTLY");
+	assert (cif0.dwait == '1) else
+		$display("6 DIDNT SET dwait VALUE CORRECTLY");
+	assert (ccif.ramstore == 32'd1) else
+		$display("6 DIDNT SET ramstore VALUE CORRECTLY");
+
+	ccif.ramstate = ACCESS;
+
+	#PERIOD;
+
+	assert (cif0.iwait == '1) else
+		$display("7 DIDNT SET iwait VALUE CORRECTLY");
+	assert (cif0.dwait == '0) else
+		$display("7 DIDNT SET dwait VALUE CORRECTLY");
+
+	cif0.dWEN = '0;
+	ccif.ramload = 32'd7;
+
+	#PERIOD;
+
+	assert (cif0.iwait == '0) else
+		$display("8 DIDNT SET iwait VALUE CORRECTLY");
+	assert (cif0.dwait == '1) else
+		$display("8 DIDNT SET dwait VALUE CORRECTLY");
+	assert (cif0.iload == 32'd7) else
+		$display("8 DIDNT SET iload VALUE CORRECTLY");
+
+	ccif.ramstate = FREE;
+	cif0.iREN = '0;
+
+	#PERIOD;
+
+	assert (cif0.iwait == '1) else
+		$display("9 DIDNT SET iwait VALUE CORRECTLY");
+	assert (cif0.dwait == '1) else
+		$display("9 DIDNT SET dwait VALUE CORRECTLY");
 
 	$display("ALL TESTS FINISHED!");
 

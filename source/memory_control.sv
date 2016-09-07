@@ -23,10 +23,10 @@ module memory_control (
 	parameter CPUS = 2;
 
 	always_comb begin
-		ccif.ramstore = '?;
+		ccif.ramstore = '0;
 		ccif.ramWEN = '0;
 		ccif.ramREN = '0;
-		ccif.ramaddr = '?;
+		ccif.ramaddr = '0;
 
 		ccif.iwait = '1;
 		ccif.dwait = '1;
