@@ -33,35 +33,35 @@ module memory_control (
 		ccif.iload = ccif.ramload;
 		ccif.dload = ccif.ramload;
 
-		if (ccif.dWEN[0] || ccif.dWEN[1]) begin
+		if (ccif.dWEN != '0) begin
 			ccif.ramWEN = 1'b1;
 			ccif.ramaddr = ccif.daddr;
 			ccif.ramstore = ccif.dstore;
 			if (ccif.ramstate == ACCESS) begin
-				if (ccif.dWEN[0])
-					ccif.dwait[0] = '0;
-				if (ccif.dWEN[1])
-					ccif.dwait[1] = '0;
+				for (int i = 0; i < CPUS; i += 1) begin
+					if (ccif.dWEN[i])
+						ccif.dwait[i] = '0;
+				end
 			end
 		end
-		else if (ccif.dREN[0] || ccif.dREN[1]) begin
+		else if (ccif.dREN != '0) begin
 			ccif.ramREN = 1'b1;
 			ccif.ramaddr = ccif.daddr;
 			if (ccif.ramstate == ACCESS) begin
-				if (ccif.dREN[0])
-					ccif.dwait[0] = '0;
-				if (ccif.dREN[1])
-					ccif.dwait[1] = '0;
+				for (int i = 0; i < CPUS; i += 1) begin
+					if (ccif.dREN[i])
+						ccif.dwait[i] = '0;
+				end
 			end
 		end
-		else if (ccif.iREN[0] || ccif.iREN[1]) begin
+		else if (ccif.iREN != '0) begin
 			ccif.ramREN = 1'b1;
 			ccif.ramaddr = ccif.iaddr;
 			if (ccif.ramstate == ACCESS) begin
-				if (ccif.iREN[0])
-					ccif.iwait[0] = '0;
-				if (ccif.iREN[1])
-					ccif.iwait[1] = '0;
+				for (int i = 0; i < CPUS; i += 1) begin
+					if (ccif.iREN[i])
+						ccif.iwait[i] = '0;
+				end
 			end
 		end
 	end
