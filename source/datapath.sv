@@ -11,7 +11,7 @@
 `include "request_unit_if.vh"
 `include "control_unit_if.vh"
 `include "ALU_if.vh"
-`include "register_file.vh"
+`include "register_file_if.vh"
 
 // alu op, mips op, and instruction type
 `include "cpu_types_pkg.vh"
@@ -33,6 +33,13 @@ module datapath (
 
 	regbits_t Rw;
 	word_t Ext_Out, Selector_Out, PC, next_PC;
+
+	PC_Register #(PC_INIT) _PC(CLK, nRST, ruif.ihit, cuif.Halt, next_PC, PC);
+	Extender _Extender(CLK, nRST, cuif.ExtOp, cuif.Upper, cuif.imm16, Ext_Out);
+	control_unit _control_unit(CLK, nRST, cuif);
+	request_unit _request_unit(CLK, nRST, ruif);
+	ALU _ALU(aluif);
+	register_file _register_file(CLK, nRST, rfif);
 
 	assign Rw = !cuif.RegDst ? cuif.Rd : cuif.Rt;
 	assign Selector_Out = cuif.ALUSrc ? rfif.rdat2 : Ext_Out;
@@ -80,24 +87,15 @@ module datapath (
 	assign dpif.dmemstore = ruif.store;
 	assign dpif.dmemaddr = ruif.daddr;
 
-	PC #(PC_INIT) _PC(CLK, nRST, ruif.ihit, cuif.Halt, next_PC, PC);
-
 	always_comb begin
-		if (JR)
+		if (cuif.JR)
 			next_PC = rfif.rdat1;
-		else if (Jmp)
+		else if (cuif.Jmp)
 			next_PC = {PC[31:28], cuif.imm26, 2'b0};
-		else if (PCSrc)
+		else if (cuif.PCSrc)
 			next_PC = (Ext_Out << 2) + 32'd4 + PC;
 		else
 			next_PC = 32'd4 + PC;
 	end
-
-	Extender _Extender(CLK, nRST, cuif.ExtOp, cuif.Upper, cuif.imm16, Ext_Out);
-
-	control_unit _control_unit(CLK, nRST, cuif);
-	request_unit _request_unit(CLK, nRST, ruif);
-	ALU _ALU(aluif);
-	register_file _register_file(CLK, nRST, rfif);
 
 endmodule
