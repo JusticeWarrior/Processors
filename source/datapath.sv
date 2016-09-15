@@ -1,6 +1,6 @@
 /*
-	Eric Villasenor
-	evillase@gmail.com
+	Jordan Huffaker
+	jhuffak@purdue.edu
 
 	datapath contains register file, control, hazard,
 	muxes, and glue logic for processor
@@ -31,6 +31,12 @@ module datapath (
 	ALU_if aluif ();
 	register_file_if rfif ();
 
+	regbits_t Rw;
+	word_t Ext_Out, Selector_Out, PC, next_PC;
+
+	assign Rw = !cuif.RegDst ? cuif.Rd : cuif.Rt;
+	assign Selector_Out = cuif.ALUSrc ? rfif.rdat2 : Ext_Out;
+
 	// control unit connections
 	assign cuif.Instr = ruif.out_instr;
 	assign cuif.Zero = aluif.zero;
@@ -43,29 +49,55 @@ module datapath (
 	assign ruif.ddata = dpif.dmemload;
 	assign ruif.ihit = dpif.ihit;
 	assign ruif.instr = dpif.imemload;
-	assign ruif.rw = // logic wire goes here
+	assign ruif.rw = rfif.rdat2;
+	assign ruif.PC = PC;
 
 	// ALU connections
 	assign aluif.ALUOP = cuif.ALUCtr;
 	assign aluif.portA = rfif.rdat1;
-	assign aluif.portB = // logic wire goes here
+	assign aluif.portB = Selector_Out;
 
 	// register_file_connections
 	assign rfif.WEN = cuif.RegWr;
-	assign rfif.wsel = // logic wire goes here
+	assign rfif.wsel = Rw;
 	assign rfif.rsel1 = cuif.Rs;
 	assign rfif.rsel2 = cuif.Rt;
-	assign rfif.wdat = // logic wire goes here
+	always_comb begin
+		if (cuif.JAL)
+			rfif.wdat = PC + 32'd4;
+		else if (cuif.ALUCtr)
+			rfif.wdat = ruif.out_ddata;
+		else
+			rfif.wdat = aluif.portOut;
+	end
 
-	PC #(PC_INIT) _PC(CLK, nRST, ruif.ihit, cuif.Halt, ruif.PC);
+	// datapath
+	assign dpif.halt = cuif.Halt;
+	assign dpif.imemREN = ruif.iren;
+	assign dpif.imemaddr = ruif.iaddr;
+	assign dpif.dmemREN = ruif.dren;
+	assign dpif.dmemWEN = ruif.wren;
+	assign dpif.dmemstore = ruif.store;
+	assign dpif.dmemaddr = ruif.daddr;
 
-	Extender _Extender(CLK, nRST, cuif.ExtOp, cuif.Upper, cuif.imm16, /* logic wire goes here */);
+	PC #(PC_INIT) _PC(CLK, nRST, ruif.ihit, cuif.Halt, next_PC, PC);
+
+	always_comb begin
+		if (JR)
+			next_PC = rfif.rdat1;
+		else if (Jmp)
+			next_PC = {PC[31:28], cuif.imm26, 2'b0};
+		else if (PCSrc)
+			next_PC = (Ext_Out << 2) + 32'd4 + PC;
+		else
+			next_PC = 32'd4 + PC;
+	end
+
+	Extender _Extender(CLK, nRST, cuif.ExtOp, cuif.Upper, cuif.imm16, Ext_Out);
 
 	control_unit _control_unit(CLK, nRST, cuif);
 	request_unit _request_unit(CLK, nRST, ruif);
 	ALU _ALU(aluif);
 	register_file _register_file(CLK, nRST, rfif);
-
-
 
 endmodule
