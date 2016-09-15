@@ -22,8 +22,8 @@ module control_unit (
 
 	assign op = C.Instr[31:26];
 	assign C.Rs = op == LUI ? '0 : C.Instr[25:21];
-	assign C.Rt = C.Instr[20:16];
-	assign C.Rd = C.Instr[15:11];
+	assign C.Rd = C.JAL ? 5'd31 : C.Instr[15:11];
+	assign C.Rt = op == RTYPE && (funct == SLL || funct == SRL) ? shamt : C.Instr[20:16];
 	assign shamt = C.Instr[10:6];
 	assign funct = C.Instr[5:0];
 	assign C.imm26 = C.Instr[25:0];
@@ -36,18 +36,18 @@ module control_unit (
 		C.MemWr = op == SW ? '1 : '0;
 		C.MemRd = op == LW ? '1 : '0;
 		C.MemtoReg = op == LW ? '1 : '0;
-		C.RegDst = op == RTYPE ? '0 : '1;
+		C.RegDst = op == RTYPE || op == JAL ? '0 : '1;
 		C.Jmp = op == J ? '1 : '0;
 		C.JAL = op == JAL ? '1 : '0;
-		C.HALT = op == HALT ? '1 : '0;
+		C.Halt = op == HALT ? '1 : '0;
 
 		C.PCSrc = '0;
 		if (op == BEQ && C.Zero)
 			C.PCSrc = '1;
-		if (op == BNE && !C.Zero)
+		else if (op == BNE && !C.Zero)
 			C.PCSrc = '1;
 
-		C.ALUCtr = '0;
+		C.ALUCtr = ALU_SLL;
 		C.JR = '0;
 		C.RegWr = '0;
 		if (op == RTYPE) begin
@@ -101,7 +101,7 @@ module control_unit (
 			C.ALUCtr = ALU_SLT;
 			C.RegWr = '1;
 		end else if (op == SLTIU) begin
-			C.ALUCtr = ALU_SLTU;
+			C.ALUCtr = ALU_SLT;
 			C.RegWr = '1;
 		end else if (op == ANDI) begin
 			C.ALUCtr = ALU_AND;
@@ -122,6 +122,8 @@ module control_unit (
 			C.ALUCtr = ALU_ADD;
 		end else if (op == BEQ || op == BNE) begin
 			C.ALUCtr = ALU_SUB;
+		end else if (op == JAL) begin
+			C.RegWr = '1;
 		end
 
 		C.ExtOp = '0;
@@ -151,7 +153,6 @@ module control_unit (
 		else if (op == BNE)
 			C.ExtOp = '1;
 
-		end
 	end
 
 endmodule
