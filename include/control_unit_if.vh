@@ -18,6 +18,8 @@ interface control_unit_if;
 	word_t		Instr;
 	regbits_t	Rd, Rt, Rs;
 	aluop_t		ALUCtr;
+	logic [25:0] imm26;
+	logic [15:0] imm16;
 
 	// control unit ports
 	modport cu (
@@ -26,8 +28,8 @@ interface control_unit_if;
 	);
 	// control unit tb
 	modport tb (
-		input	MemtoReg, ALUCtr, Rd, Rt, Rs, PCSrc, Jmp, imm26, RegDst, RegWr, JAL, imm16, Upper, ExtOp, ALUSrc, MemRd, MemWr, Halt, JR
-		output		Zero, Instr,
+		input	MemtoReg, ALUCtr, Rd, Rt, Rs, PCSrc, Jmp, imm26, RegDst, RegWr, JAL, imm16, Upper, ExtOp, ALUSrc, MemRd, MemWr, Halt, JR,
+		output		Zero, Instr
 	);
 endinterface
 

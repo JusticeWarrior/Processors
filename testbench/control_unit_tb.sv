@@ -365,8 +365,8 @@ module control_unit_tb;
 		$display("7 DIDNT SET ExtOp CORRECTLY");
 	assert (cuif.Upper == '0) else
 		$display("7 DIDNT SET Upper CORRECTLY");
-	//assert (cuif.MemtoReg == '0) else
-	//	$display("7 DIDNT SET MemtoReg CORRECTLY");
+	assert (cuif.MemtoReg == '1) else
+		$display("7 DIDNT SET MemtoReg CORRECTLY");
 	assert (cuif.JAL == '0) else
 		$display("7 DIDNT SET JAL CORRECTLY");
 	assert (cuif.RegWr == '1) else
@@ -410,8 +410,8 @@ module control_unit_tb;
 		$display("8 DIDNT SET ExtOp CORRECTLY");
 	assert (cuif.Upper == '0) else
 		$display("8 DIDNT SET Upper CORRECTLY");
-	//assert (cuif.MemtoReg == '0) else
-	//	$display("7 DIDNT SET MemtoReg CORRECTLY");
+	assert (cuif.MemtoReg == '0) else
+		$display("8 DIDNT SET MemtoReg CORRECTLY");
 	assert (cuif.JAL == '0) else
 		$display("8 DIDNT SET JAL CORRECTLY");
 	assert (cuif.RegWr == '1) else
@@ -455,8 +455,8 @@ module control_unit_tb;
 		$display("9 DIDNT SET ExtOp CORRECTLY");
 	assert (cuif.Upper == '0) else
 		$display("9 DIDNT SET Upper CORRECTLY");
-	//assert (cuif.MemtoReg == '0) else
-	//	$display("7 DIDNT SET MemtoReg CORRECTLY");
+	assert (cuif.MemtoReg == '0) else
+		$display("9 DIDNT SET MemtoReg CORRECTLY");
 	assert (cuif.JAL == '0) else
 		$display("9 DIDNT SET JAL CORRECTLY");
 	assert (cuif.RegWr == '1) else
@@ -500,8 +500,8 @@ module control_unit_tb;
 		$display("1 DIDNT SET ExtOp CORRECTLY");
 	assert (cuif.Upper == '0) else
 		$display("1 DIDNT SET Upper CORRECTLY");
-	//assert (cuif.MemtoReg == '0) else
-	//	$display("7 DIDNT SET MemtoReg CORRECTLY");
+	assert (cuif.MemtoReg == '0) else
+		$display("1 DIDNT SET MemtoReg CORRECTLY");
 	assert (cuif.JAL == '0) else
 		$display("1 DIDNT SET JAL CORRECTLY");
 	assert (cuif.RegWr == '1) else
@@ -546,7 +546,7 @@ module control_unit_tb;
 	assert (cuif.Upper == '0) else
 		$display("2 DIDNT SET Upper CORRECTLY");
 	//assert (cuif.MemtoReg == '0) else
-	//	$display("7 DIDNT SET MemtoReg CORRECTLY");
+	//	$display("2 DIDNT SET MemtoReg CORRECTLY");
 	assert (cuif.JAL == '0) else
 		$display("2 DIDNT SET JAL CORRECTLY");
 	assert (cuif.RegWr == '0) else
@@ -590,8 +590,8 @@ module control_unit_tb;
 		$display("3 DIDNT SET ExtOp CORRECTLY");
 	assert (cuif.Upper == '0) else
 		$display("3 DIDNT SET Upper CORRECTLY");
-	//assert (cuif.MemtoReg == '0) else
-	//	$display("3 DIDNT SET MemtoReg CORRECTLY");
+	assert (cuif.MemtoReg == '0) else
+		$display("3 DIDNT SET MemtoReg CORRECTLY");
 	assert (cuif.JAL == '0) else
 		$display("3 DIDNT SET JAL CORRECTLY");
 	assert (cuif.RegWr == '1) else
@@ -745,8 +745,589 @@ module control_unit_tb;
 		$display("7 DIDNT SET PCSrc CORRECTLY");
 
 	cuif.Zero = '0;
-	cuif.Instr = {HALT, 5'd2, 5'd2, 16'd4};
+	cuif.Instr = {RTYPE, 5'd2, 5'd2, 5'd2, 5'd4, ADDU};
 
+	#PERIOD;
+
+	// r type
+	assert (cuif.Rs == 5'd2) else
+		$display("8 DIDNT SET Rs CORRECTLY");
+	assert (cuif.Rt == 5'd2) else
+		$display("8 DIDNT SET Rt CORRECTLY");
+	assert (cuif.Rd == 5'd2) else
+		$display("8 DIDNT SET Rd CORRECTLY");
+	//assert (cuif.imm16 == 16'd4) else
+	//	$display("8 DIDNT SET imm16 CORRECTLY");
+	//assert (cuif.imm26 == 26'd4) else
+	//	$display("7 DIDNT SET imm26 CORRECTLY");
+	assert (cuif.RegDst == '0) else
+		$display("8 DIDNT SET RegDst CORRECTLY");
+	assert (cuif.ALUSrc == '0) else
+		$display("8 DIDNT SET ALUSrc CORRECTLY");
+	assert (cuif.ALUCtr == ALU_ADD) else
+		$display("8 DIDNT SET ALUCtr CORRECTLY");
+	//assert (cuif.ExtOp == '0) else
+	//	$display("8 DIDNT SET ExtOp CORRECTLY");
+	//assert (cuif.Upper == '0) else
+	//	$display("8 DIDNT SET Upper CORRECTLY");
+	assert (cuif.MemtoReg == '0) else
+		$display("7 DIDNT SET MemtoReg CORRECTLY");
+	assert (cuif.JAL == '0) else
+		$display("8 DIDNT SET JAL CORRECTLY");
+	assert (cuif.RegWr == '1) else
+		$display("8 DIDNT SET RegWr CORRECTLY");
+	assert (cuif.MemRd == '0) else
+		$display("8 DIDNT SET MemRd CORRECTLY");
+	assert (cuif.MemWr == '0) else
+		$display("8 DIDNT SET MemWr CORRECTLY");
+	assert (cuif.Halt == '0) else
+		$display("8 DIDNT SET Halt CORRECTLY");
+	assert (cuif.Jmp == '0) else
+		$display("8 DIDNT SET Jmp CORRECTLY");
+	assert (cuif.JR == '0) else
+		$display("8 DIDNT SET JR CORRECTLY");
+	assert (cuif.PCSrc == '0) else
+		$display("8 DIDNT SET PCSrc CORRECTLY");
+
+	cuif.Zero = '0;
+	cuif.Instr = {RTYPE, 5'd2, 5'd2, 5'd2, 5'd4, ADD};
+
+	#PERIOD;
+
+	// r type
+	assert (cuif.Rs == 5'd2) else
+		$display("8 DIDNT SET Rs CORRECTLY");
+	assert (cuif.Rt == 5'd2) else
+		$display("8 DIDNT SET Rt CORRECTLY");
+	assert (cuif.Rd == 5'd2) else
+		$display("8 DIDNT SET Rd CORRECTLY");
+	//assert (cuif.imm16 == 16'd4) else
+	//	$display("8 DIDNT SET imm16 CORRECTLY");
+	//assert (cuif.imm26 == 26'd4) else
+	//	$display("7 DIDNT SET imm26 CORRECTLY");
+	assert (cuif.RegDst == '0) else
+		$display("8 DIDNT SET RegDst CORRECTLY");
+	assert (cuif.ALUSrc == '0) else
+		$display("8 DIDNT SET ALUSrc CORRECTLY");
+	assert (cuif.ALUCtr == ALU_ADD) else
+		$display("8 DIDNT SET ALUCtr CORRECTLY");
+	//assert (cuif.ExtOp == '0) else
+	//	$display("8 DIDNT SET ExtOp CORRECTLY");
+	//assert (cuif.Upper == '0) else
+	//	$display("8 DIDNT SET Upper CORRECTLY");
+	assert (cuif.MemtoReg == '0) else
+		$display("7 DIDNT SET MemtoReg CORRECTLY");
+	assert (cuif.JAL == '0) else
+		$display("8 DIDNT SET JAL CORRECTLY");
+	assert (cuif.RegWr == '1) else
+		$display("8 DIDNT SET RegWr CORRECTLY");
+	assert (cuif.MemRd == '0) else
+		$display("8 DIDNT SET MemRd CORRECTLY");
+	assert (cuif.MemWr == '0) else
+		$display("8 DIDNT SET MemWr CORRECTLY");
+	assert (cuif.Halt == '0) else
+		$display("8 DIDNT SET Halt CORRECTLY");
+	assert (cuif.Jmp == '0) else
+		$display("8 DIDNT SET Jmp CORRECTLY");
+	assert (cuif.JR == '0) else
+		$display("8 DIDNT SET JR CORRECTLY");
+	assert (cuif.PCSrc == '0) else
+		$display("8 DIDNT SET PCSrc CORRECTLY");
+
+	cuif.Zero = '0;
+	cuif.Instr = {RTYPE, 5'd2, 5'd2, 5'd2, 5'd4, AND};
+
+	#PERIOD;
+
+	// r type
+	assert (cuif.Rs == 5'd2) else
+		$display("8 DIDNT SET Rs CORRECTLY");
+	assert (cuif.Rt == 5'd2) else
+		$display("8 DIDNT SET Rt CORRECTLY");
+	assert (cuif.Rd == 5'd2) else
+		$display("8 DIDNT SET Rd CORRECTLY");
+	//assert (cuif.imm16 == 16'd4) else
+	//	$display("8 DIDNT SET imm16 CORRECTLY");
+	//assert (cuif.imm26 == 26'd4) else
+	//	$display("7 DIDNT SET imm26 CORRECTLY");
+	assert (cuif.RegDst == '0) else
+		$display("8 DIDNT SET RegDst CORRECTLY");
+	assert (cuif.ALUSrc == '0) else
+		$display("8 DIDNT SET ALUSrc CORRECTLY");
+	assert (cuif.ALUCtr == ALU_AND) else
+		$display("8 DIDNT SET ALUCtr CORRECTLY");
+	//assert (cuif.ExtOp == '0) else
+	//	$display("8 DIDNT SET ExtOp CORRECTLY");
+	//assert (cuif.Upper == '0) else
+	//	$display("8 DIDNT SET Upper CORRECTLY");
+	assert (cuif.MemtoReg == '0) else
+		$display("7 DIDNT SET MemtoReg CORRECTLY");
+	assert (cuif.JAL == '0) else
+		$display("8 DIDNT SET JAL CORRECTLY");
+	assert (cuif.RegWr == '1) else
+		$display("8 DIDNT SET RegWr CORRECTLY");
+	assert (cuif.MemRd == '0) else
+		$display("8 DIDNT SET MemRd CORRECTLY");
+	assert (cuif.MemWr == '0) else
+		$display("8 DIDNT SET MemWr CORRECTLY");
+	assert (cuif.Halt == '0) else
+		$display("8 DIDNT SET Halt CORRECTLY");
+	assert (cuif.Jmp == '0) else
+		$display("8 DIDNT SET Jmp CORRECTLY");
+	assert (cuif.JR == '0) else
+		$display("8 DIDNT SET JR CORRECTLY");
+	assert (cuif.PCSrc == '0) else
+		$display("8 DIDNT SET PCSrc CORRECTLY");
+
+	cuif.Zero = '0;
+	cuif.Instr = {RTYPE, 5'd2, 5'd2, 5'd2, 5'd4, JR};
+
+	#PERIOD;
+
+	// r type
+	assert (cuif.Rs == 5'd2) else
+		$display("8 DIDNT SET Rs CORRECTLY");
+	//assert (cuif.Rt == 5'd2) else
+	//	$display("8 DIDNT SET Rt CORRECTLY");
+	//assert (cuif.Rd == 5'd2) else
+	//	$display("8 DIDNT SET Rd CORRECTLY");
+	//assert (cuif.imm16 == 16'd4) else
+	//	$display("8 DIDNT SET imm16 CORRECTLY");
+	//assert (cuif.imm26 == 26'd4) else
+	//	$display("7 DIDNT SET imm26 CORRECTLY");
+	//assert (cuif.RegDst == '0) else
+	//	$display("8 DIDNT SET RegDst CORRECTLY");
+	//assert (cuif.ALUSrc == '0) else
+	//	$display("8 DIDNT SET ALUSrc CORRECTLY");
+	//assert (cuif.ALUCtr == ALU_AND) else
+	//	$display("8 DIDNT SET ALUCtr CORRECTLY");
+	//assert (cuif.ExtOp == '0) else
+	//	$display("8 DIDNT SET ExtOp CORRECTLY");
+	//assert (cuif.Upper == '0) else
+	//	$display("8 DIDNT SET Upper CORRECTLY");
+	//assert (cuif.MemtoReg == '0) else
+	//	$display("7 DIDNT SET MemtoReg CORRECTLY");
+	//assert (cuif.JAL == '0) else
+	//	$display("8 DIDNT SET JAL CORRECTLY");
+	assert (cuif.RegWr == '0) else
+		$display("8 DIDNT SET RegWr CORRECTLY");
+	assert (cuif.MemRd == '0) else
+		$display("8 DIDNT SET MemRd CORRECTLY");
+	assert (cuif.MemWr == '0) else
+		$display("8 DIDNT SET MemWr CORRECTLY");
+	assert (cuif.Halt == '0) else
+		$display("8 DIDNT SET Halt CORRECTLY");
+	assert (cuif.Jmp == '0) else
+		$display("8 DIDNT SET Jmp CORRECTLY");
+	assert (cuif.JR == '1) else
+		$display("8 DIDNT SET JR CORRECTLY");
+	assert (cuif.PCSrc == '0) else
+		$display("8 DIDNT SET PCSrc CORRECTLY");
+
+	cuif.Zero = '0;
+	cuif.Instr = {RTYPE, 5'd2, 5'd2, 5'd2, 5'd4, NOR};
+
+	#PERIOD;
+
+	// r type
+	assert (cuif.Rs == 5'd2) else
+		$display("8 DIDNT SET Rs CORRECTLY");
+	assert (cuif.Rt == 5'd2) else
+		$display("8 DIDNT SET Rt CORRECTLY");
+	assert (cuif.Rd == 5'd2) else
+		$display("8 DIDNT SET Rd CORRECTLY");
+	//assert (cuif.imm16 == 16'd4) else
+	//	$display("8 DIDNT SET imm16 CORRECTLY");
+	//assert (cuif.imm26 == 26'd4) else
+	//	$display("7 DIDNT SET imm26 CORRECTLY");
+	assert (cuif.RegDst == '0) else
+		$display("8 DIDNT SET RegDst CORRECTLY");
+	assert (cuif.ALUSrc == '0) else
+		$display("8 DIDNT SET ALUSrc CORRECTLY");
+	assert (cuif.ALUCtr == ALU_NOR) else
+		$display("8 DIDNT SET ALUCtr CORRECTLY");
+	//assert (cuif.ExtOp == '0) else
+	//	$display("8 DIDNT SET ExtOp CORRECTLY");
+	//assert (cuif.Upper == '0) else
+	//	$display("8 DIDNT SET Upper CORRECTLY");
+	assert (cuif.MemtoReg == '0) else
+		$display("7 DIDNT SET MemtoReg CORRECTLY");
+	assert (cuif.JAL == '0) else
+		$display("8 DIDNT SET JAL CORRECTLY");
+	assert (cuif.RegWr == '1) else
+		$display("8 DIDNT SET RegWr CORRECTLY");
+	assert (cuif.MemRd == '0) else
+		$display("8 DIDNT SET MemRd CORRECTLY");
+	assert (cuif.MemWr == '0) else
+		$display("8 DIDNT SET MemWr CORRECTLY");
+	assert (cuif.Halt == '0) else
+		$display("8 DIDNT SET Halt CORRECTLY");
+	assert (cuif.Jmp == '0) else
+		$display("8 DIDNT SET Jmp CORRECTLY");
+	assert (cuif.JR == '0) else
+		$display("8 DIDNT SET JR CORRECTLY");
+	assert (cuif.PCSrc == '0) else
+		$display("8 DIDNT SET PCSrc CORRECTLY");
+
+	cuif.Zero = '0;
+	cuif.Instr = {RTYPE, 5'd2, 5'd2, 5'd2, 5'd4, OR};
+
+	#PERIOD;
+
+	// r type
+	assert (cuif.Rs == 5'd2) else
+		$display("8 DIDNT SET Rs CORRECTLY");
+	assert (cuif.Rt == 5'd2) else
+		$display("8 DIDNT SET Rt CORRECTLY");
+	assert (cuif.Rd == 5'd2) else
+		$display("8 DIDNT SET Rd CORRECTLY");
+	//assert (cuif.imm16 == 16'd4) else
+	//	$display("8 DIDNT SET imm16 CORRECTLY");
+	//assert (cuif.imm26 == 26'd4) else
+	//	$display("7 DIDNT SET imm26 CORRECTLY");
+	assert (cuif.RegDst == '0) else
+		$display("8 DIDNT SET RegDst CORRECTLY");
+	assert (cuif.ALUSrc == '0) else
+		$display("8 DIDNT SET ALUSrc CORRECTLY");
+	assert (cuif.ALUCtr == ALU_OR) else
+		$display("8 DIDNT SET ALUCtr CORRECTLY");
+	//assert (cuif.ExtOp == '0) else
+	//	$display("8 DIDNT SET ExtOp CORRECTLY");
+	//assert (cuif.Upper == '0) else
+	//	$display("8 DIDNT SET Upper CORRECTLY");
+	assert (cuif.MemtoReg == '0) else
+		$display("7 DIDNT SET MemtoReg CORRECTLY");
+	assert (cuif.JAL == '0) else
+		$display("8 DIDNT SET JAL CORRECTLY");
+	assert (cuif.RegWr == '1) else
+		$display("8 DIDNT SET RegWr CORRECTLY");
+	assert (cuif.MemRd == '0) else
+		$display("8 DIDNT SET MemRd CORRECTLY");
+	assert (cuif.MemWr == '0) else
+		$display("8 DIDNT SET MemWr CORRECTLY");
+	assert (cuif.Halt == '0) else
+		$display("8 DIDNT SET Halt CORRECTLY");
+	assert (cuif.Jmp == '0) else
+		$display("8 DIDNT SET Jmp CORRECTLY");
+	assert (cuif.JR == '0) else
+		$display("8 DIDNT SET JR CORRECTLY");
+	assert (cuif.PCSrc == '0) else
+		$display("8 DIDNT SET PCSrc CORRECTLY");
+
+	cuif.Zero = '0;
+	cuif.Instr = {RTYPE, 5'd2, 5'd2, 5'd2, 5'd4, SLT};
+
+	#PERIOD;
+
+	// r type
+	assert (cuif.Rs == 5'd2) else
+		$display("8 DIDNT SET Rs CORRECTLY");
+	assert (cuif.Rt == 5'd2) else
+		$display("8 DIDNT SET Rt CORRECTLY");
+	assert (cuif.Rd == 5'd2) else
+		$display("8 DIDNT SET Rd CORRECTLY");
+	//assert (cuif.imm16 == 16'd4) else
+	//	$display("8 DIDNT SET imm16 CORRECTLY");
+	//assert (cuif.imm26 == 26'd4) else
+	//	$display("7 DIDNT SET imm26 CORRECTLY");
+	assert (cuif.RegDst == '0) else
+		$display("8 DIDNT SET RegDst CORRECTLY");
+	assert (cuif.ALUSrc == '0) else
+		$display("8 DIDNT SET ALUSrc CORRECTLY");
+	assert (cuif.ALUCtr == ALU_SLT) else
+		$display("8 DIDNT SET ALUCtr CORRECTLY");
+	//assert (cuif.ExtOp == '0) else
+	//	$display("8 DIDNT SET ExtOp CORRECTLY");
+	//assert (cuif.Upper == '0) else
+	//	$display("8 DIDNT SET Upper CORRECTLY");
+	assert (cuif.MemtoReg == '0) else
+		$display("7 DIDNT SET MemtoReg CORRECTLY");
+	assert (cuif.JAL == '0) else
+		$display("8 DIDNT SET JAL CORRECTLY");
+	assert (cuif.RegWr == '1) else
+		$display("8 DIDNT SET RegWr CORRECTLY");
+	assert (cuif.MemRd == '0) else
+		$display("8 DIDNT SET MemRd CORRECTLY");
+	assert (cuif.MemWr == '0) else
+		$display("8 DIDNT SET MemWr CORRECTLY");
+	assert (cuif.Halt == '0) else
+		$display("8 DIDNT SET Halt CORRECTLY");
+	assert (cuif.Jmp == '0) else
+		$display("8 DIDNT SET Jmp CORRECTLY");
+	assert (cuif.JR == '0) else
+		$display("8 DIDNT SET JR CORRECTLY");
+	assert (cuif.PCSrc == '0) else
+		$display("8 DIDNT SET PCSrc CORRECTLY");
+
+	cuif.Zero = '0;
+	cuif.Instr = {RTYPE, 5'd2, 5'd2, 5'd2, 5'd4, SLTU};
+
+	#PERIOD;
+
+	// r type
+	assert (cuif.Rs == 5'd2) else
+		$display("8 DIDNT SET Rs CORRECTLY");
+	assert (cuif.Rt == 5'd2) else
+		$display("8 DIDNT SET Rt CORRECTLY");
+	assert (cuif.Rd == 5'd2) else
+		$display("8 DIDNT SET Rd CORRECTLY");
+	//assert (cuif.imm16 == 16'd4) else
+	//	$display("8 DIDNT SET imm16 CORRECTLY");
+	//assert (cuif.imm26 == 26'd4) else
+	//	$display("7 DIDNT SET imm26 CORRECTLY");
+	assert (cuif.RegDst == '0) else
+		$display("8 DIDNT SET RegDst CORRECTLY");
+	assert (cuif.ALUSrc == '0) else
+		$display("8 DIDNT SET ALUSrc CORRECTLY");
+	assert (cuif.ALUCtr == ALU_SLTU) else
+		$display("8 DIDNT SET ALUCtr CORRECTLY");
+	//assert (cuif.ExtOp == '0) else
+	//	$display("8 DIDNT SET ExtOp CORRECTLY");
+	//assert (cuif.Upper == '0) else
+	//	$display("8 DIDNT SET Upper CORRECTLY");
+	assert (cuif.MemtoReg == '0) else
+		$display("7 DIDNT SET MemtoReg CORRECTLY");
+	assert (cuif.JAL == '0) else
+		$display("8 DIDNT SET JAL CORRECTLY");
+	assert (cuif.RegWr == '1) else
+		$display("8 DIDNT SET RegWr CORRECTLY");
+	assert (cuif.MemRd == '0) else
+		$display("8 DIDNT SET MemRd CORRECTLY");
+	assert (cuif.MemWr == '0) else
+		$display("8 DIDNT SET MemWr CORRECTLY");
+	assert (cuif.Halt == '0) else
+		$display("8 DIDNT SET Halt CORRECTLY");
+	assert (cuif.Jmp == '0) else
+		$display("8 DIDNT SET Jmp CORRECTLY");
+	assert (cuif.JR == '0) else
+		$display("8 DIDNT SET JR CORRECTLY");
+	assert (cuif.PCSrc == '0) else
+		$display("8 DIDNT SET PCSrc CORRECTLY");
+
+	cuif.Zero = '0;
+	cuif.Instr = {RTYPE, 5'd2, 5'd2, 5'd2, 5'd4, SLL};
+
+	#PERIOD;
+
+	// r type
+	assert (cuif.Rs == 5'd2) else
+		$display("8 DIDNT SET Rs CORRECTLY");
+	assert (cuif.Rt == 5'd4) else
+		$display("8 DIDNT SET Rt CORRECTLY");
+	assert (cuif.Rd == 5'd2) else
+		$display("8 DIDNT SET Rd CORRECTLY");
+	//assert (cuif.imm16 == 16'd4) else
+	//	$display("8 DIDNT SET imm16 CORRECTLY");
+	//assert (cuif.imm26 == 26'd4) else
+	//	$display("7 DIDNT SET imm26 CORRECTLY");
+	assert (cuif.RegDst == '0) else
+		$display("8 DIDNT SET RegDst CORRECTLY");
+	assert (cuif.ALUSrc == '0) else
+		$display("8 DIDNT SET ALUSrc CORRECTLY");
+	assert (cuif.ALUCtr == ALU_SLL) else
+		$display("8 DIDNT SET ALUCtr CORRECTLY");
+	//assert (cuif.ExtOp == '0) else
+	//	$display("8 DIDNT SET ExtOp CORRECTLY");
+	//assert (cuif.Upper == '0) else
+	//	$display("8 DIDNT SET Upper CORRECTLY");
+	assert (cuif.MemtoReg == '0) else
+		$display("7 DIDNT SET MemtoReg CORRECTLY");
+	assert (cuif.JAL == '0) else
+		$display("8 DIDNT SET JAL CORRECTLY");
+	assert (cuif.RegWr == '1) else
+		$display("8 DIDNT SET RegWr CORRECTLY");
+	assert (cuif.MemRd == '0) else
+		$display("8 DIDNT SET MemRd CORRECTLY");
+	assert (cuif.MemWr == '0) else
+		$display("8 DIDNT SET MemWr CORRECTLY");
+	assert (cuif.Halt == '0) else
+		$display("8 DIDNT SET Halt CORRECTLY");
+	assert (cuif.Jmp == '0) else
+		$display("8 DIDNT SET Jmp CORRECTLY");
+	assert (cuif.JR == '0) else
+		$display("8 DIDNT SET JR CORRECTLY");
+	assert (cuif.PCSrc == '0) else
+		$display("8 DIDNT SET PCSrc CORRECTLY");
+
+	cuif.Zero = '0;
+	cuif.Instr = {RTYPE, 5'd2, 5'd2, 5'd2, 5'd4, SRL};
+
+	#PERIOD;
+
+	// r type
+	assert (cuif.Rs == 5'd2) else
+		$display("8 DIDNT SET Rs CORRECTLY");
+	assert (cuif.Rt == 5'd4) else
+		$display("8 DIDNT SET Rt CORRECTLY");
+	assert (cuif.Rd == 5'd2) else
+		$display("8 DIDNT SET Rd CORRECTLY");
+	//assert (cuif.imm16 == 16'd4) else
+	//	$display("8 DIDNT SET imm16 CORRECTLY");
+	//assert (cuif.imm26 == 26'd4) else
+	//	$display("7 DIDNT SET imm26 CORRECTLY");
+	assert (cuif.RegDst == '0) else
+		$display("8 DIDNT SET RegDst CORRECTLY");
+	assert (cuif.ALUSrc == '0) else
+		$display("8 DIDNT SET ALUSrc CORRECTLY");
+	assert (cuif.ALUCtr == ALU_SRL) else
+		$display("8 DIDNT SET ALUCtr CORRECTLY");
+	//assert (cuif.ExtOp == '0) else
+	//	$display("8 DIDNT SET ExtOp CORRECTLY");
+	//assert (cuif.Upper == '0) else
+	//	$display("8 DIDNT SET Upper CORRECTLY");
+	assert (cuif.MemtoReg == '0) else
+		$display("7 DIDNT SET MemtoReg CORRECTLY");
+	assert (cuif.JAL == '0) else
+		$display("8 DIDNT SET JAL CORRECTLY");
+	assert (cuif.RegWr == '1) else
+		$display("8 DIDNT SET RegWr CORRECTLY");
+	assert (cuif.MemRd == '0) else
+		$display("8 DIDNT SET MemRd CORRECTLY");
+	assert (cuif.MemWr == '0) else
+		$display("8 DIDNT SET MemWr CORRECTLY");
+	assert (cuif.Halt == '0) else
+		$display("8 DIDNT SET Halt CORRECTLY");
+	assert (cuif.Jmp == '0) else
+		$display("8 DIDNT SET Jmp CORRECTLY");
+	assert (cuif.JR == '0) else
+		$display("8 DIDNT SET JR CORRECTLY");
+	assert (cuif.PCSrc == '0) else
+		$display("8 DIDNT SET PCSrc CORRECTLY");
+
+	cuif.Zero = '0;
+	cuif.Instr = {RTYPE, 5'd2, 5'd2, 5'd2, 5'd4, SUBU};
+
+	#PERIOD;
+
+	// r type
+	assert (cuif.Rs == 5'd2) else
+		$display("8 DIDNT SET Rs CORRECTLY");
+	assert (cuif.Rt == 5'd2) else
+		$display("8 DIDNT SET Rt CORRECTLY");
+	assert (cuif.Rd == 5'd2) else
+		$display("8 DIDNT SET Rd CORRECTLY");
+	//assert (cuif.imm16 == 16'd4) else
+	//	$display("8 DIDNT SET imm16 CORRECTLY");
+	//assert (cuif.imm26 == 26'd4) else
+	//	$display("7 DIDNT SET imm26 CORRECTLY");
+	assert (cuif.RegDst == '0) else
+		$display("8 DIDNT SET RegDst CORRECTLY");
+	assert (cuif.ALUSrc == '0) else
+		$display("8 DIDNT SET ALUSrc CORRECTLY");
+	assert (cuif.ALUCtr == ALU_SUB) else
+		$display("8 DIDNT SET ALUCtr CORRECTLY");
+	//assert (cuif.ExtOp == '0) else
+	//	$display("8 DIDNT SET ExtOp CORRECTLY");
+	//assert (cuif.Upper == '0) else
+	//	$display("8 DIDNT SET Upper CORRECTLY");
+	assert (cuif.MemtoReg == '0) else
+		$display("7 DIDNT SET MemtoReg CORRECTLY");
+	assert (cuif.JAL == '0) else
+		$display("8 DIDNT SET JAL CORRECTLY");
+	assert (cuif.RegWr == '1) else
+		$display("8 DIDNT SET RegWr CORRECTLY");
+	assert (cuif.MemRd == '0) else
+		$display("8 DIDNT SET MemRd CORRECTLY");
+	assert (cuif.MemWr == '0) else
+		$display("8 DIDNT SET MemWr CORRECTLY");
+	assert (cuif.Halt == '0) else
+		$display("8 DIDNT SET Halt CORRECTLY");
+	assert (cuif.Jmp == '0) else
+		$display("8 DIDNT SET Jmp CORRECTLY");
+	assert (cuif.JR == '0) else
+		$display("8 DIDNT SET JR CORRECTLY");
+	assert (cuif.PCSrc == '0) else
+		$display("8 DIDNT SET PCSrc CORRECTLY");
+
+	cuif.Zero = '0;
+	cuif.Instr = {RTYPE, 5'd2, 5'd2, 5'd2, 5'd4, SUB};
+
+	#PERIOD;
+
+	// r type
+	assert (cuif.Rs == 5'd2) else
+		$display("8 DIDNT SET Rs CORRECTLY");
+	assert (cuif.Rt == 5'd2) else
+		$display("8 DIDNT SET Rt CORRECTLY");
+	assert (cuif.Rd == 5'd2) else
+		$display("8 DIDNT SET Rd CORRECTLY");
+	//assert (cuif.imm16 == 16'd4) else
+	//	$display("8 DIDNT SET imm16 CORRECTLY");
+	//assert (cuif.imm26 == 26'd4) else
+	//	$display("7 DIDNT SET imm26 CORRECTLY");
+	assert (cuif.RegDst == '0) else
+		$display("8 DIDNT SET RegDst CORRECTLY");
+	assert (cuif.ALUSrc == '0) else
+		$display("8 DIDNT SET ALUSrc CORRECTLY");
+	assert (cuif.ALUCtr == ALU_SUB) else
+		$display("8 DIDNT SET ALUCtr CORRECTLY");
+	//assert (cuif.ExtOp == '0) else
+	//	$display("8 DIDNT SET ExtOp CORRECTLY");
+	//assert (cuif.Upper == '0) else
+	//	$display("8 DIDNT SET Upper CORRECTLY");
+	assert (cuif.MemtoReg == '0) else
+		$display("7 DIDNT SET MemtoReg CORRECTLY");
+	assert (cuif.JAL == '0) else
+		$display("8 DIDNT SET JAL CORRECTLY");
+	assert (cuif.RegWr == '1) else
+		$display("8 DIDNT SET RegWr CORRECTLY");
+	assert (cuif.MemRd == '0) else
+		$display("8 DIDNT SET MemRd CORRECTLY");
+	assert (cuif.MemWr == '0) else
+		$display("8 DIDNT SET MemWr CORRECTLY");
+	assert (cuif.Halt == '0) else
+		$display("8 DIDNT SET Halt CORRECTLY");
+	assert (cuif.Jmp == '0) else
+		$display("8 DIDNT SET Jmp CORRECTLY");
+	assert (cuif.JR == '0) else
+		$display("8 DIDNT SET JR CORRECTLY");
+	assert (cuif.PCSrc == '0) else
+		$display("8 DIDNT SET PCSrc CORRECTLY");
+
+	cuif.Zero = '0;
+	cuif.Instr = {RTYPE, 5'd2, 5'd2, 5'd2, 5'd4, XOR};
+
+	#PERIOD;
+
+	// r type
+	assert (cuif.Rs == 5'd2) else
+		$display("8 DIDNT SET Rs CORRECTLY");
+	assert (cuif.Rt == 5'd2) else
+		$display("8 DIDNT SET Rt CORRECTLY");
+	assert (cuif.Rd == 5'd2) else
+		$display("8 DIDNT SET Rd CORRECTLY");
+	//assert (cuif.imm16 == 16'd4) else
+	//	$display("8 DIDNT SET imm16 CORRECTLY");
+	//assert (cuif.imm26 == 26'd4) else
+	//	$display("7 DIDNT SET imm26 CORRECTLY");
+	assert (cuif.RegDst == '0) else
+		$display("8 DIDNT SET RegDst CORRECTLY");
+	assert (cuif.ALUSrc == '0) else
+		$display("8 DIDNT SET ALUSrc CORRECTLY");
+	assert (cuif.ALUCtr == ALU_XOR) else
+		$display("8 DIDNT SET ALUCtr CORRECTLY");
+	//assert (cuif.ExtOp == '0) else
+	//	$display("8 DIDNT SET ExtOp CORRECTLY");
+	//assert (cuif.Upper == '0) else
+	//	$display("8 DIDNT SET Upper CORRECTLY");
+	assert (cuif.MemtoReg == '0) else
+		$display("7 DIDNT SET MemtoReg CORRECTLY");
+	assert (cuif.JAL == '0) else
+		$display("8 DIDNT SET JAL CORRECTLY");
+	assert (cuif.RegWr == '1) else
+		$display("8 DIDNT SET RegWr CORRECTLY");
+	assert (cuif.MemRd == '0) else
+		$display("8 DIDNT SET MemRd CORRECTLY");
+	assert (cuif.MemWr == '0) else
+		$display("8 DIDNT SET MemWr CORRECTLY");
+	assert (cuif.Halt == '0) else
+		$display("8 DIDNT SET Halt CORRECTLY");
+	assert (cuif.Jmp == '0) else
+		$display("8 DIDNT SET Jmp CORRECTLY");
+	assert (cuif.JR == '0) else
+		$display("8 DIDNT SET JR CORRECTLY");
+	assert (cuif.PCSrc == '0) else
+		$display("8 DIDNT SET PCSrc CORRECTLY");
 
 
 	$display("ALL TESTS FINISHED!");
