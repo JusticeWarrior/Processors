@@ -59,7 +59,7 @@ module request_unit_tb;
 `endif
 
 	initial begin
-		nRST = 1'b0;
+	nRST = 1'b0;
 	ruif.dhit = '0;
 	ruif.ddata = '0;
 	ruif.ihit = '0;
@@ -86,7 +86,6 @@ module request_unit_tb;
 	assert (ruif.iaddr == '0) else
 		$display("DIDNT SET INITIAL iaddr CORRECTLY");
 
-	nRST = 1'b0;
 	ruif.MemWr = '1;
 	ruif.rw = 32'd5;
 	ruif.aluDaddr = 32'd3;
@@ -116,7 +115,7 @@ module request_unit_tb;
 		$display("2 DIDNT SET INITIAL wren CORRECTLY");
 	assert (ruif.store == 32'd5) else
 		$display("2 DIDNT SET INITIAL store CORRECTLY");
-	assert (ruif.daddr == 32'd5) else
+	assert (ruif.daddr == 32'd3) else
 		$display("2 DIDNT SET INITIAL daddr CORRECTLY");
 
 	ruif.ihit = '0;
@@ -131,7 +130,7 @@ module request_unit_tb;
 		$display("3 DIDNT SET INITIAL wren CORRECTLY");
 	assert (ruif.store == 32'd5) else
 		$display("3 DIDNT SET INITIAL store CORRECTLY");
-	assert (ruif.daddr == 32'd5) else
+	assert (ruif.daddr == 32'd3) else
 		$display("3 DIDNT SET INITIAL daddr CORRECTLY");
 
 	ruif.dhit = '1;
