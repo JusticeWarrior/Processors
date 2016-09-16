@@ -64,6 +64,7 @@ module request_unit (
 		R.iren = '0;
 		R.out_instr = R.instr;
 		R.out_ddata = R.ddata;
+		R.Adv = nextState != get_instr ? '0 : R.ihit;
 
 		case(state)
 			get_instr: begin

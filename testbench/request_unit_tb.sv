@@ -42,6 +42,7 @@ module request_unit_tb;
 		.\ruif.iren (ruif.iren),
 		.\ruif.out_instr (ruif.out_instr),
 		.\ruif.out_ddata (ruif.out_ddata),
+		.\ruif.Adv (ruif.Adv),
 
 		.\ruif.dhit (ruif.dhit),
 		.\ruif.ddata (ruif.ddata),
@@ -85,6 +86,8 @@ module request_unit_tb;
 		$display("DIDNT SET INITIAL dren CORRECTLY");
 	assert (ruif.iaddr == '0) else
 		$display("DIDNT SET INITIAL iaddr CORRECTLY");
+	assert (ruif.Adv == '0) else
+		$display("DIDNT SET INITIAL Adv CORRECTLY");
 
 	ruif.MemWr = '1;
 	ruif.rw = 32'd5;
@@ -102,6 +105,8 @@ module request_unit_tb;
 		$display("1 DIDNT SET INITIAL iaddr CORRECTLY");
 	assert (ruif.out_instr == 32'd6) else
 		$display("1 DIDNT SET INITIAL out_instr CORRECTLY");
+	assert (ruif.Adv == '0) else
+		$display("1 DIDNT SET INITIAL Adv CORRECTLY");
 
 	ruif.ihit = '1;
 
@@ -117,6 +122,8 @@ module request_unit_tb;
 		$display("2 DIDNT SET INITIAL store CORRECTLY");
 	assert (ruif.daddr == 32'd3) else
 		$display("2 DIDNT SET INITIAL daddr CORRECTLY");
+	assert (ruif.Adv == '0) else
+		$display("2 DIDNT SET INITIAL Adv CORRECTLY");
 
 	ruif.ihit = '0;
 
@@ -132,6 +139,8 @@ module request_unit_tb;
 		$display("3 DIDNT SET INITIAL store CORRECTLY");
 	assert (ruif.daddr == 32'd3) else
 		$display("3 DIDNT SET INITIAL daddr CORRECTLY");
+	assert (ruif.Adv == '0) else
+		$display("3 DIDNT SET INITIAL Adv CORRECTLY");
 
 	ruif.dhit = '1;
 
@@ -147,6 +156,8 @@ module request_unit_tb;
 		$display("4 DIDNT SET INITIAL iaddr CORRECTLY");
 	assert (ruif.out_instr == 32'd6) else
 		$display("4 DIDNT SET INITIAL out_instr CORRECTLY");
+	assert (ruif.Adv == '0) else
+		$display("4 DIDNT SET INITIAL Adv CORRECTLY");
 
 	ruif.MemWr = '0;
 	ruif.dhit = '0;
@@ -167,6 +178,8 @@ module request_unit_tb;
 		$display("5 DIDNT SET INITIAL daddr CORRECTLY");
 	assert (ruif.out_ddata == 32'd1) else
 		$display("5 DIDNT SET INITIAL out_ddata CORRECTLY");
+	assert (ruif.Adv == '0) else
+		$display("5 DIDNT SET INITIAL Adv CORRECTLY");
 
 	ruif.dhit = '1;
 
@@ -182,6 +195,8 @@ module request_unit_tb;
 		$display("6 DIDNT SET INITIAL iaddr CORRECTLY");
 	assert (ruif.out_instr == 32'd6) else
 		$display("6 DIDNT SET INITIAL out_instr CORRECTLY");
+	assert (ruif.Adv == '0) else
+		$display("6 DIDNT SET INITIAL Adv CORRECTLY");
 
 	$display("ALL TESTS FINISHED!");
 
