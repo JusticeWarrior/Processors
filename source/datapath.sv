@@ -34,7 +34,7 @@ module datapath (
 	regbits_t Rw;
 	word_t Ext_Out, Selector_Out, PC, next_PC;
 
-	PC_Register #(PC_INIT) _PC(CLK, nRST, ruif.ihit, cuif.Halt, next_PC, PC);
+	PC_Register #(PC_INIT) _PC(CLK, nRST, ruif.Adv, cuif.Halt, next_PC, PC);
 	Extender _Extender(CLK, nRST, cuif.ExtOp, cuif.Upper, cuif.imm16, Ext_Out);
 	control_unit _control_unit(CLK, nRST, cuif);
 	request_unit _request_unit(CLK, nRST, ruif);
@@ -42,7 +42,7 @@ module datapath (
 	register_file _register_file(CLK, nRST, rfif);
 
 	assign Rw = !cuif.RegDst ? cuif.Rd : cuif.Rt;
-	assign Selector_Out = cuif.ALUSrc ? rfif.rdat2 : Ext_Out;
+	assign Selector_Out = cuif.ALUSrc ? Ext_Out : rfif.rdat2;
 
 	// control unit connections
 	assign cuif.Instr = ruif.out_instr;
@@ -65,14 +65,14 @@ module datapath (
 	assign aluif.portB = Selector_Out;
 
 	// register_file_connections
-	assign rfif.WEN = cuif.RegWr;
+	assign rfif.WEN = cuif.RegWr && ruif.Adv;
 	assign rfif.wsel = Rw;
 	assign rfif.rsel1 = cuif.Rs;
 	assign rfif.rsel2 = cuif.Rt;
 	always_comb begin
 		if (cuif.JAL)
 			rfif.wdat = PC + 32'd4;
-		else if (cuif.ALUCtr)
+		else if (cuif.MemtoReg)
 			rfif.wdat = ruif.out_ddata;
 		else
 			rfif.wdat = aluif.portOut;
