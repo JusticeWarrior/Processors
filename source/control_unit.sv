@@ -23,16 +23,16 @@ module control_unit (
 	assign op = C.Instr[31:26];
 	assign C.Rs = op == LUI ? '0 : C.Instr[25:21];
 	assign C.Rd = C.JAL ? 5'd31 : C.Instr[15:11];
-	assign C.Rt = op == RTYPE && (funct == SLL || funct == SRL) ? shamt : C.Instr[20:16];
+	assign C.Rt = C.Instr[20:16];
 	assign shamt = C.Instr[10:6];
 	assign funct = C.Instr[5:0];
 	assign C.imm26 = C.Instr[25:0];
-	assign C.imm16 = C.Instr[15:0];
+	assign C.imm16 = op == RTYPE && (funct == SLL || funct == SRL) ? {11'd0, shamt} : C.Instr[15:0];
 
 	always_comb begin
 		C.PCSrc = op == BEQ || op == BNE ? '1 : '0;
 
-		C.ALUSrc = op == RTYPE || op == BEQ || op == BNE ? '0 : '1;
+		C.ALUSrc = (op == RTYPE && funct != SLL && funct != SRL) || op == BEQ || op == BNE ? '0 : '1;
 		C.MemWr = op == SW ? '1 : '0;
 		C.MemRd = op == LW ? '1 : '0;
 		C.MemtoReg = op == LW ? '1 : '0;
@@ -152,6 +152,9 @@ module control_unit (
 			C.ExtOp = '1;
 		else if (op == BNE)
 			C.ExtOp = '1;
+		else if (op == RTYPE && (funct == SLL || funct == SRL)) begin
+			C.ExtOp = '0;
+		end
 
 	end
 

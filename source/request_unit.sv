@@ -62,9 +62,9 @@ module request_unit (
 		R.dren = '0;
 		R.iaddr = R.PC;
 		R.iren = '0;
-		R.out_instr = R.instr;
+		R.out_instr = R.ihit || R.dhit ?  R.instr : '0;
 		R.out_ddata = R.ddata;
-		R.Adv = nextState != get_instr ? '0 : R.ihit;
+		R.Adv = nextState != get_instr ? '0 : R.ihit || R.dhit;
 
 		case(state)
 			get_instr: begin

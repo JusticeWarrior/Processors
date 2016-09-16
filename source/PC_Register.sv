@@ -9,16 +9,16 @@
 
 module PC_Register (
 	input logic CLK, nRST, Adv, Halt,
-	input word_t next_PC,
-	output word_t PC
+	input logic [31:0] next_PC,
+	output logic [31:0] PC
 );
 	// pc init
 	parameter PC_INIT = 0;
 	// import types
 	import cpu_types_pkg::*;
 
-	always_ff @(posedge clk, negedge n_rst) begin
-		if (n_rst == '0)
+	always_ff @(posedge CLK, negedge nRST) begin
+		if (nRST == '0)
 			PC <= PC_INIT;
 		else if (Adv && !Halt)
 			PC <= next_PC;

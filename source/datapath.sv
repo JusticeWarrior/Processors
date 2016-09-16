@@ -90,7 +90,7 @@ module datapath (
 	always_comb begin
 		if (cuif.JR)
 			next_PC = rfif.rdat1;
-		else if (cuif.Jmp)
+		else if (cuif.Jmp || cuif.JAL)
 			next_PC = {PC[31:28], cuif.imm26, 2'b0};
 		else if (cuif.PCSrc)
 			next_PC = (Ext_Out << 2) + 32'd4 + PC;

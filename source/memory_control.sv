@@ -39,8 +39,8 @@ module memory_control (
 			ccif.ramstore = ccif.dstore;
 			if (ccif.ramstate == ACCESS) begin
 				for (int i = 0; i < CPUS; i += 1) begin
-					if (ccif.dWEN[i])
-						ccif.dwait[i] = '0;
+					if (ccif.dWEN[0])
+						ccif.dwait[0] = '0;
 				end
 			end
 		end
@@ -49,8 +49,8 @@ module memory_control (
 			ccif.ramaddr = ccif.daddr;
 			if (ccif.ramstate == ACCESS) begin
 				for (int i = 0; i < CPUS; i += 1) begin
-					if (ccif.dREN[i])
-						ccif.dwait[i] = '0;
+					if (ccif.dREN[0])
+						ccif.dwait[0] = '0;
 				end
 			end
 		end
@@ -59,8 +59,8 @@ module memory_control (
 			ccif.ramaddr = ccif.iaddr;
 			if (ccif.ramstate == ACCESS) begin
 				for (int i = 0; i < CPUS; i += 1) begin
-					if (ccif.iREN[i])
-						ccif.iwait[i] = '0;
+					if (ccif.iREN[0])
+						ccif.iwait[0] = '0;
 				end
 			end
 		end

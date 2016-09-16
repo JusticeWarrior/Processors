@@ -1112,24 +1112,24 @@ module control_unit_tb;
 	// r type
 	assert (cuif.Rs == 5'd2) else
 		$display("8 DIDNT SET Rs CORRECTLY");
-	assert (cuif.Rt == 5'd4) else
-		$display("8 DIDNT SET Rt CORRECTLY");
+	//assert (cuif.Rt == 5'd4) else
+	//	$display("8 DIDNT SET Rt CORRECTLY");
 	assert (cuif.Rd == 5'd2) else
 		$display("8 DIDNT SET Rd CORRECTLY");
-	//assert (cuif.imm16 == 16'd4) else
-	//	$display("8 DIDNT SET imm16 CORRECTLY");
+	assert (cuif.imm16 == 16'd4) else
+		$display("8 DIDNT SET imm16 CORRECTLY");
 	//assert (cuif.imm26 == 26'd4) else
 	//	$display("7 DIDNT SET imm26 CORRECTLY");
 	assert (cuif.RegDst == '0) else
 		$display("8 DIDNT SET RegDst CORRECTLY");
-	assert (cuif.ALUSrc == '0) else
+	assert (cuif.ALUSrc == '1) else
 		$display("8 DIDNT SET ALUSrc CORRECTLY");
 	assert (cuif.ALUCtr == ALU_SLL) else
 		$display("8 DIDNT SET ALUCtr CORRECTLY");
-	//assert (cuif.ExtOp == '0) else
-	//	$display("8 DIDNT SET ExtOp CORRECTLY");
-	//assert (cuif.Upper == '0) else
-	//	$display("8 DIDNT SET Upper CORRECTLY");
+	assert (cuif.ExtOp == '0) else
+		$display("8 DIDNT SET ExtOp CORRECTLY");
+	assert (cuif.Upper == '0) else
+		$display("8 DIDNT SET Upper CORRECTLY");
 	assert (cuif.MemtoReg == '0) else
 		$display("7 DIDNT SET MemtoReg CORRECTLY");
 	assert (cuif.JAL == '0) else
@@ -1157,24 +1157,24 @@ module control_unit_tb;
 	// r type
 	assert (cuif.Rs == 5'd2) else
 		$display("8 DIDNT SET Rs CORRECTLY");
-	assert (cuif.Rt == 5'd4) else
-		$display("8 DIDNT SET Rt CORRECTLY");
+	//assert (cuif.Rt == 5'd4) else
+	//	$display("8 DIDNT SET Rt CORRECTLY");
 	assert (cuif.Rd == 5'd2) else
 		$display("8 DIDNT SET Rd CORRECTLY");
-	//assert (cuif.imm16 == 16'd4) else
-	//	$display("8 DIDNT SET imm16 CORRECTLY");
+	assert (cuif.imm16 == 16'd4) else
+		$display("8 DIDNT SET imm16 CORRECTLY");
 	//assert (cuif.imm26 == 26'd4) else
 	//	$display("7 DIDNT SET imm26 CORRECTLY");
 	assert (cuif.RegDst == '0) else
 		$display("8 DIDNT SET RegDst CORRECTLY");
-	assert (cuif.ALUSrc == '0) else
+	assert (cuif.ALUSrc == '1) else
 		$display("8 DIDNT SET ALUSrc CORRECTLY");
 	assert (cuif.ALUCtr == ALU_SRL) else
 		$display("8 DIDNT SET ALUCtr CORRECTLY");
-	//assert (cuif.ExtOp == '0) else
-	//	$display("8 DIDNT SET ExtOp CORRECTLY");
-	//assert (cuif.Upper == '0) else
-	//	$display("8 DIDNT SET Upper CORRECTLY");
+	assert (cuif.ExtOp == '0) else
+		$display("8 DIDNT SET ExtOp CORRECTLY");
+	assert (cuif.Upper == '0) else
+		$display("8 DIDNT SET Upper CORRECTLY");
 	assert (cuif.MemtoReg == '0) else
 		$display("7 DIDNT SET MemtoReg CORRECTLY");
 	assert (cuif.JAL == '0) else

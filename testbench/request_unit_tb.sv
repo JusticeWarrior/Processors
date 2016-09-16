@@ -103,7 +103,7 @@ module request_unit_tb;
 		$display("1 DIDNT SET INITIAL dren CORRECTLY");
 	assert (ruif.iaddr == '0) else
 		$display("1 DIDNT SET INITIAL iaddr CORRECTLY");
-	assert (ruif.out_instr == 32'd6) else
+	assert (ruif.out_instr == 32'd0) else
 		$display("1 DIDNT SET INITIAL out_instr CORRECTLY");
 	assert (ruif.Adv == '0) else
 		$display("1 DIDNT SET INITIAL Adv CORRECTLY");
@@ -156,7 +156,7 @@ module request_unit_tb;
 		$display("4 DIDNT SET INITIAL iaddr CORRECTLY");
 	assert (ruif.out_instr == 32'd6) else
 		$display("4 DIDNT SET INITIAL out_instr CORRECTLY");
-	assert (ruif.Adv == '0) else
+	assert (ruif.Adv == '1) else
 		$display("4 DIDNT SET INITIAL Adv CORRECTLY");
 
 	ruif.MemWr = '0;

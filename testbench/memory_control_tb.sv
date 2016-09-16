@@ -9,6 +9,7 @@
 `include "cache_control_if.vh"
 `include "caches_if.vh"
 `include "cpu_types_pkg.vh"
+`include "cpu_ram_if.vh"
 
 // mapped timing needs this. 1ns is too fast
 `timescale 1 ns / 1 ns
@@ -33,10 +34,19 @@ module memory_control_tb;
   caches_if cif0();
   caches_if cif1();
   cache_control_if #(.CPUS(1)) ccif (cif0, cif1);
+  cpu_ram_if ramif();
   // test program
   test PROG (CLK,nRST,ccif);
   // DUT
   memory_control DUT(CLK, nRST, ccif);
+  ram DUTT(CLK, nRST, ramif.ram);
+
+  assign ccif.ramstate = ramif.ramstate;
+  assign ccif.ramload = ramif.ramload;
+  assign ramif.ramstore = ccif.ramstore;
+  assign ramif.ramaddr = ccif.ramaddr;
+  assign ramif.ramWEN = ccif.ramWEN;
+  assign ramif.ramREN = ccif.ramREN;
 
 
 endmodule
@@ -54,8 +64,8 @@ program test(input logic CLK, output logic nRST, cache_control_if.cc ccif);
 	cif0.dstore = '0;
 	cif0.iaddr = '0;
 	cif0.daddr = '0;
-	ccif.ramload = '0;
-	ccif.ramstate = FREE;
+	//ccif.ramload = '0;
+	//ccif.ramstate = FREE;
 
 	#PERIOD;
 
@@ -69,7 +79,7 @@ program test(input logic CLK, output logic nRST, cache_control_if.cc ccif);
 		$display("1 DIDNT SET dwait VALUE CORRECTLY");
 
 	cif0.dREN = '1;
-	ccif.ramstate = BUSY;
+	//ccif.ramstate = BUSY;
 	cif0.daddr = 32'd5;
 
 	#PERIOD;
@@ -86,8 +96,8 @@ program test(input logic CLK, output logic nRST, cache_control_if.cc ccif);
 	assert (cif0.dwait == '1) else
 		$display("3 DIDNT SET dwait VALUE CORRECTLY");
 
-	ccif.ramstate = ACCESS;
-	ccif.ramload = 32'd1;
+	//ccif.ramstate = ACCESS;
+	//ccif.ramload = 32'd1;
 
 	#PERIOD;
 
@@ -98,7 +108,7 @@ program test(input logic CLK, output logic nRST, cache_control_if.cc ccif);
 	assert (ccif.dload == 32'd1) else
 		$display("4 DIDNT SET dload VALUE CORRECTLY");
 
-	ccif.ramstate = FREE;
+	//ccif.ramstate = FREE;
 	cif0.dREN = '0;
 
 	#PERIOD;
@@ -111,7 +121,7 @@ program test(input logic CLK, output logic nRST, cache_control_if.cc ccif);
 	cif0.dWEN = '1;
 	cif0.iREN = '1;
 	cif0.iaddr = 32'd6;
-	ccif.ramstate = BUSY;
+	//ccif.ramstate = BUSY;
 	cif0.daddr = 32'd5;
 	cif0.dstore = 32'd1;
 
@@ -124,7 +134,7 @@ program test(input logic CLK, output logic nRST, cache_control_if.cc ccif);
 	assert (ccif.ramstore == 32'd1) else
 		$display("6 DIDNT SET ramstore VALUE CORRECTLY");
 
-	ccif.ramstate = ACCESS;
+	//ccif.ramstate = ACCESS;
 
 	#PERIOD;
 
@@ -134,7 +144,7 @@ program test(input logic CLK, output logic nRST, cache_control_if.cc ccif);
 		$display("7 DIDNT SET dwait VALUE CORRECTLY");
 
 	cif0.dWEN = '0;
-	ccif.ramload = 32'd7;
+	//ccif.ramload = 32'd7;
 
 	#PERIOD;
 
@@ -145,7 +155,7 @@ program test(input logic CLK, output logic nRST, cache_control_if.cc ccif);
 	assert (cif0.iload == 32'd7) else
 		$display("8 DIDNT SET iload VALUE CORRECTLY");
 
-	ccif.ramstate = FREE;
+	//ccif.ramstate = FREE;
 	cif0.iREN = '0;
 
 	#PERIOD;

@@ -14,7 +14,10 @@ module Extender (
 		if (Upper)
 			out = {imm16, 16'd0};
 		else if (ExtOp)
-			out = {16'd65535, imm16};
+			if (imm16[15])
+				out = {16'd65535, imm16};
+			else
+				out = {16'd0, imm16};
 		else
 			out = {16'd0, imm16};
 	end
