@@ -26,8 +26,8 @@ interface decode_latch_if;
 	);
 	// decode latch tb
 	modport tb (
-		input	out_pc_plus_4, out_porta, out_rdat2, out_extout, out_ALUSrc, out_Branch, out_bne, out_regWEN, out_halt, out_Jump, out_MemtoReg, out_dREN, out_dWEN, out_ALUop, out_regDST, out_Rd, out_Rt, out_jaddr, out_JAL
-		output	pc_plus_4, rdat1, rdat2, extout, ALUSrc, Branch, bne, regWEN, halt, Jump, MemtoReg, dREN, dWEN, ALUop, regDst, Rd, Rt, jaddr, JAL, flush, en,
+		input	out_pc_plus_4, out_porta, out_rdat2, out_extout, out_ALUSrc, out_Branch, out_bne, out_regWEN, out_halt, out_Jump, out_MemtoReg, out_dREN, out_dWEN, out_ALUop, out_regDST, out_Rd, out_Rt, out_jaddr, out_JAL,
+		output	pc_plus_4, rdat1, rdat2, extout, ALUSrc, Branch, bne, regWEN, halt, Jump, MemtoReg, dREN, dWEN, ALUop, regDst, Rd, Rt, jaddr, JAL, flush, en
 	);
 endinterface
 
