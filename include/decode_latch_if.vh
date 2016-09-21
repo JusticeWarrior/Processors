@@ -22,11 +22,11 @@ interface decode_latch_if;
 	// decode latch ports
 	modport fl (
 		input	pc_plus_4, rdat1, rdat2, extout, ALUSrc, Branch, bne, regWEN, halt, Jump, MemtoReg, dREN, dWEN, ALUop, regDst, Rd, Rt, jaddr, JAL, flush, en,
-		output	out_pc_plus_4, out_porta, out_rdat2, out_extout, out_ALUSrc, out_Branch, out_bne, out_regWEN, out_halt, out_Jump, out_MemtoReg, out_dREN, out_dWEN, out_ALUop, out_regDST, out_Rd, out_Rt, out_jaddr, out_JAL
+		output	out_pc_plus_4, out_porta, out_rdat2, out_extout, out_ALUSrc, out_Branch, out_bne, out_regWEN, out_halt, out_Jump, out_MemtoReg, out_dREN, out_dWEN, out_ALUop, out_regDst, out_Rd, out_Rt, out_jaddr, out_JAL
 	);
 	// decode latch tb
 	modport tb (
-		input	out_pc_plus_4, out_porta, out_rdat2, out_extout, out_ALUSrc, out_Branch, out_bne, out_regWEN, out_halt, out_Jump, out_MemtoReg, out_dREN, out_dWEN, out_ALUop, out_regDST, out_Rd, out_Rt, out_jaddr, out_JAL,
+		input	out_pc_plus_4, out_porta, out_rdat2, out_extout, out_ALUSrc, out_Branch, out_bne, out_regWEN, out_halt, out_Jump, out_MemtoReg, out_dREN, out_dWEN, out_ALUop, out_regDst, out_Rd, out_Rt, out_jaddr, out_JAL,
 		output	pc_plus_4, rdat1, rdat2, extout, ALUSrc, Branch, bne, regWEN, halt, Jump, MemtoReg, dREN, dWEN, ALUop, regDst, Rd, Rt, jaddr, JAL, flush, en
 	);
 endinterface
