@@ -26,6 +26,8 @@ module execute_latch (
 			out_dWEN <= 0;
 			out_wsel <= 0;
 			out_jaddr <= 0;
+			out_Rd <= 0;
+			out_Rt <= 0;
 		end
 		else begin
 			if(flush) begin
@@ -45,6 +47,8 @@ module execute_latch (
 				out_dWEN <= 0;
 				out_wsel <= 0;
 				out_jaddr <= 0;
+				out_Rd <= 0;
+				out_Rt <= 0;
 			end
 			else if(en) begin
 				out_pc_plus_4 <= pc_plus_4;
@@ -63,6 +67,8 @@ module execute_latch (
 				out_dWEN <= dWEN;
 				out_wsel <= wsel;
 				out_jaddr <= jaddr;
+				out_Rd <= Rd;
+				out_Rt <= Rt;
 			end
 			else begin
 				out_pc_plus_4 <= out_pc_plus_4;
@@ -81,6 +87,8 @@ module execute_latch (
 				out_dWEN <= out_dWEN;
 				out_wsel <= out_wsel;
 				out_jaddr <= out_jaddr;
+				out_Rd <= out_Rd;
+				out_Rt <= out_Rt;
 			end
 		end
 
