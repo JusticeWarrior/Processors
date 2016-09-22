@@ -58,6 +58,8 @@ module control_unit_tb;
 		.\cuif.MemWr (cuif.MemWr),
 		.\cuif.Halt (cuif.Halt),
 		.\cuif.JR (cuif.JR),
+		.\cuif.branch (cuif.branch),
+		.\cuif.bne (cuif.bne),
 		.\nRST (nRST),
 		.\CLK (CLK)
 	);
@@ -248,6 +250,10 @@ module control_unit_tb;
 		$display("4 DIDNT SET JR CORRECTLY");
 	assert (cuif.PCSrc == '1) else
 		$display("4 DIDNT SET PCSrc CORRECTLY");
+	assert (cuif.branch == '1) else
+		$display("4 DIDNT SET branch CORRECTLY");
+	assert (cuif.bne == '0) else
+		$display("4 DIDNT SET bne CORRECTLY");
 
 	cuif.Zero = '0;
 	cuif.Instr = {BNE, 5'd2, 5'd2, 16'd4};
@@ -293,6 +299,10 @@ module control_unit_tb;
 		$display("5 DIDNT SET JR CORRECTLY");
 	assert (cuif.PCSrc == '1) else
 		$display("5 DIDNT SET PCSrc CORRECTLY");
+	assert (cuif.branch == '0) else
+		$display("4 DIDNT SET branch CORRECTLY");
+	assert (cuif.bne == '1) else
+		$display("4 DIDNT SET bne CORRECTLY");
 
 	cuif.Zero = '0;
 	cuif.Instr = {LUI, 5'd2, 5'd2, 16'd4};
@@ -338,6 +348,10 @@ module control_unit_tb;
 		$display("6 DIDNT SET JR CORRECTLY");
 	assert (cuif.PCSrc == '0) else
 		$display("6 DIDNT SET PCSrc CORRECTLY");
+	assert (cuif.branch == '0) else
+		$display("4 DIDNT SET branch CORRECTLY");
+	assert (cuif.bne == '0) else
+		$display("4 DIDNT SET bne CORRECTLY");
 
 	cuif.Zero = '0;
 	cuif.Instr = {LW, 5'd2, 5'd2, 16'd4};

@@ -28,6 +28,8 @@ module control_unit (
 	assign funct = C.Instr[5:0];
 	assign C.imm26 = C.Instr[25:0];
 	assign C.imm16 = op == RTYPE && (funct == SLL || funct == SRL) ? {11'd0, shamt} : C.Instr[15:0];
+	assign C.branch = op == BEQ ? '1 : '0;
+	assign C.bne = op == BNE ? '1 : '0;
 
 	always_comb begin
 		C.PCSrc = op == BEQ || op == BNE ? '1 : '0;

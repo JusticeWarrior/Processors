@@ -14,7 +14,7 @@ interface control_unit_if;
 	// import types
 	import cpu_types_pkg::*;
 
-	logic	Zero, MemtoReg, PCSrc, Jmp, RegDst, RegWr, JAL, Upper, ExtOp, ALUSrc, MemRd, MemWr, Halt, JR;
+	logic	Zero, MemtoReg, PCSrc, Jmp, RegDst, RegWr, JAL, Upper, ExtOp, ALUSrc, MemRd, MemWr, Halt, JR, branch, bne;
 	word_t		Instr;
 	regbits_t	Rd, Rt, Rs;
 	aluop_t		ALUCtr;
@@ -24,11 +24,11 @@ interface control_unit_if;
 	// control unit ports
 	modport cu (
 		input		Zero, Instr,
-		output	MemtoReg, ALUCtr, Rd, Rt, Rs, PCSrc, Jmp, imm26, RegDst, RegWr, JAL, imm16, Upper, ExtOp, ALUSrc, MemRd, MemWr, Halt, JR
+		output	MemtoReg, ALUCtr, Rd, Rt, Rs, PCSrc, Jmp, imm26, RegDst, RegWr, JAL, imm16, Upper, ExtOp, ALUSrc, MemRd, MemWr, Halt, JR, branch, bne
 	);
 	// control unit tb
 	modport tb (
-		input	MemtoReg, ALUCtr, Rd, Rt, Rs, PCSrc, Jmp, imm26, RegDst, RegWr, JAL, imm16, Upper, ExtOp, ALUSrc, MemRd, MemWr, Halt, JR,
+		input	MemtoReg, ALUCtr, Rd, Rt, Rs, PCSrc, Jmp, imm26, RegDst, RegWr, JAL, imm16, Upper, ExtOp, ALUSrc, MemRd, MemWr, Halt, JR, branch, bne,
 		output		Zero, Instr
 	);
 endinterface
