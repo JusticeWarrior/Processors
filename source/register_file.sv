@@ -16,7 +16,7 @@ module register_file (
 
   logic [31:0] mem [31:0];
 
-  always_ff @ (posedge clk, negedge n_rst) begin
+  always_ff @ (negedge clk, negedge n_rst) begin
     if (n_rst == '0) begin
 		for (int i = 0; i < 32; i += 1) begin
         	mem[i] <= 32'b0;
