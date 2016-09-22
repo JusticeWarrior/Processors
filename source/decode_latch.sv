@@ -25,8 +25,6 @@ module decode_latch (
 			out_dWEN <= 0;
 			out_ALUop <= ALU_SLTU;
 			out_regDst <= 0;
-			out_Rd <= 0;
-			out_Rt <= 0;
 			out_jaddr <= 0;
 			out_JAL <= 0;
 		end
@@ -47,8 +45,6 @@ module decode_latch (
 				out_dWEN <= 0;
 				out_ALUop <= ALU_SLTU;
 				out_regDst <= 0;
-				out_Rd <= 0;
-				out_Rt <= 0;
 				out_jaddr <= 0;
 				out_JAL <= 0;
 			end
@@ -68,8 +64,6 @@ module decode_latch (
 				out_dWEN <= dWEN;
 				out_ALUop <= ALUop;
 				out_regDst <= regDst;
-				out_Rd <= Rd;
-				out_Rt <= Rt;
 				out_jaddr <= jaddr;
 				out_JAL <= JAL;
 			end
@@ -89,8 +83,6 @@ module decode_latch (
 				out_dWEN <= out_dWEN;
 				out_ALUop <= out_ALUop;
 				out_regDst <= out_regDST;
-				out_Rd <= out_Rd;
-				out_Rt <= out_Rt;
 				out_jaddr <= out_jaddr;
 				out_JAL <= out_JAL;
 			end
