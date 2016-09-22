@@ -10,21 +10,21 @@ module fetch_latch (
 
 	always_ff @(posedge CLK, negedge nRST) begin
 		if(!nRST) begin
-			instr <= 0;
-			out_pc_plus_4 <= 0;
+			flif.instr <= 0;
+			flif.out_pc_plus_4 <= 0;
 		end
 		else begin
-			if(flush) begin
-				instr <= 0;
-				out_pc_plus_4 <= 0;
+			if(flif.flush) begin
+				flif.instr <= 0;
+				flif.out_pc_plus_4 <= 0;
 			end
-			else if(en) begin
-				instr <= imemload;
-				out_pc_plus_4 <= pc_plus_4;
+			else if(flif.en) begin
+				flif.instr <= flif.imemload;
+				flif.out_pc_plus_4 <= flif.pc_plus_4;
 			end
 			else begin
-				instr <= instr;
-				out_pc_plus_4 <= out_pc_plus_4;
+				flif.instr <= flif.instr;
+				flif.out_pc_plus_4 <= flif.out_pc_plus_4;
 			end
 		end
 	end

@@ -29,7 +29,7 @@ module decode_latch (
 			dlif.out_JAL <= 0;
 		end
 		else begin
-			if(flush) begin
+			if(dlif.flush) begin
 				dlif.out_pc_plus_4 <= 0;
 				dlif.out_porta <= 0;
 				dlif.out_rdat2 <= 0;
@@ -48,7 +48,7 @@ module decode_latch (
 				dlif.out_jaddr <= 0;
 				dlif.out_JAL <= 0;
 			end
-			else if(en) begin
+			else if(dlif.en) begin
 				dlif.out_pc_plus_4 <= dlif.pc_plus_4;
 				dlif.out_porta <= dlif.rdat1;
 				dlif.out_rdat2 <= dlif.rdat2;

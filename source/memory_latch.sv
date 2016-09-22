@@ -22,7 +22,7 @@ module memory_latch (
 			mlif.out_dload <= 0;
 		end
 		else begin
-			if(flush) begin
+			if(mlif.flush) begin
 				mlif.out_pc_plus_4 <= 0;
 				mlif.out_portout <= 0;
 				mlif.out_regWEN <= 0;
@@ -34,7 +34,7 @@ module memory_latch (
 				mlif.out_jaddr <= 0;
 				mlif.out_dload <= 0;
 			end
-			else if(en) begin
+			else if(mlif.en) begin
 				mlif.out_pc_plus_4 <= mlif.pc_plus_4;
 				mlif.out_portout <= mlif.portout;
 				mlif.out_regWEN <= mlif.regWEN;
