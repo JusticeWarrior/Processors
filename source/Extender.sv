@@ -8,7 +8,7 @@
 module Extender (
 	input logic CLK, nRST, ExtOp, Upper,
 	input logic [15:0] imm16,
-	output logic [31:0] out
+	output logic [32:0] out
 );
 	always_comb begin
 		if (Upper)

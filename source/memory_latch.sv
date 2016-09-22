@@ -8,8 +8,6 @@ module memory_latch (
 
 	import cpu_types_pkg::*;
 
-	word_t internal_dload;
-
 	always_ff @(posedge CLK, negedge nRST) begin
 		if(!nRST) begin
 			mlif.out_pc_plus_4 <= 0;
@@ -22,7 +20,6 @@ module memory_latch (
 			mlif.out_wsel <= 0;
 			mlif.out_jaddr <= 0;
 			mlif.out_dload <= 0;
-			internal_dload <= '0;
 		end
 		else begin
 			if(mlif.flush) begin
@@ -36,7 +33,6 @@ module memory_latch (
 				mlif.out_wsel <= 0;
 				mlif.out_jaddr <= 0;
 				mlif.out_dload <= 0;
-				// internal_dload is not flushed here!!!!
 			end
 			else if(mlif.en) begin
 				mlif.out_pc_plus_4 <= mlif.pc_plus_4;
@@ -48,7 +44,7 @@ module memory_latch (
 				mlif.out_MemtoReg <= mlif.MemtoReg;
 				mlif.out_wsel <= mlif.wsel;
 				mlif.out_jaddr <= mlif.jaddr;
-				mlif.out_dload <= internal_dload;
+				mlif.out_dload <= mlif.dload;
 			end
 			else begin
 				mlif.out_pc_plus_4 <= mlif.out_pc_plus_4;
@@ -61,11 +57,7 @@ module memory_latch (
 				mlif.out_wsel <= mlif.out_wsel;
 				mlif.out_jaddr <= mlif.out_jaddr;
 				mlif.out_dload <= mlif.out_dload;
-				if (mlif.dhit) begin
-					internal_dload <= mlif.dload;
-				end
 			end
 		end
-	end
 
 endmodule
