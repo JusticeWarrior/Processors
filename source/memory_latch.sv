@@ -10,53 +10,53 @@ module memory_latch (
 
 	always_ff @(posedge CLK, negedge nRST) begin
 		if(!nRST) begin
-			out_pc_plus_4 <= 0;
-			out_portout <= 0;
-			out_regWEN <= 0;
-			out_halt <= 0;
-			out_Jump <= 0;
-			out_JAL <= 0;
-			out_MemtoReg <= 0;
-			out_wsel <= 0;
-			out_jaddr <= 0;
-			out_dload <= 0;
+			mlif.out_pc_plus_4 <= 0;
+			mlif.out_portout <= 0;
+			mlif.out_regWEN <= 0;
+			mlif.out_halt <= 0;
+			mlif.out_Jump <= 0;
+			mlif.out_JAL <= 0;
+			mlif.out_MemtoReg <= 0;
+			mlif.out_wsel <= 0;
+			mlif.out_jaddr <= 0;
+			mlif.out_dload <= 0;
 		end
 		else begin
-			if(flush) begin
-				out_pc_plus_4 <= 0;
-				out_portout <= 0;
-				out_regWEN <= 0;
-				out_halt <= 0;
-				out_Jump <= 0;
-				out_JAL <= 0;
-				out_MemtoReg <= 0;
-				out_wsel <= 0;
-				out_jaddr <= 0;
-				out_dload <= 0;
+			if(mlif.flush) begin
+				mlif.out_pc_plus_4 <= 0;
+				mlif.out_portout <= 0;
+				mlif.out_regWEN <= 0;
+				mlif.out_halt <= 0;
+				mlif.out_Jump <= 0;
+				mlif.out_JAL <= 0;
+				mlif.out_MemtoReg <= 0;
+				mlif.out_wsel <= 0;
+				mlif.out_jaddr <= 0;
+				mlif.out_dload <= 0;
 			end
-			else if(en) begin
-				out_pc_plus_4 <= pc_plus_4;
-				out_portout <= portout;
-				out_regWEN <= regWEN;
-				out_halt <= halt;
-				out_Jump <= Jump;
-				out_JAL <= JAL;
-				out_MemtoReg <= MemtoReg;
-				out_wsel <= wsel;
-				out_jaddr <= jaddr;
-				out_dload <= dload;
+			else if(mlif.en) begin
+				mlif.out_pc_plus_4 <= mlif.pc_plus_4;
+				mlif.out_portout <= mlif.portout;
+				mlif.out_regWEN <= mlif.regWEN;
+				mlif.out_halt <= mlif.halt;
+				mlif.out_Jump <= mlif.Jump;
+				mlif.out_JAL <= mlif.JAL;
+				mlif.out_MemtoReg <= mlif.MemtoReg;
+				mlif.out_wsel <= mlif.wsel;
+				mlif.out_jaddr <= mlif.jaddr;
+				mlif.out_dload <= mlif.dload;
 			end
 			else begin
-				out_pc_plus_4 <= out_pc_plus_4;
-				out_portout <= out_portout;
-				out_regWEN <= out_regWEN;
-				out_halt <= out_halt;
-				out_Jump <= out_Jump;
-				out_JAL <= out_JAL;
-				out_MemtoReg <= out_MemtoReg;
-				out_wsel <= out_wsel;
-				out_jaddr <= out_jaddr;
-				out_dload <= out_dload;
+				mlif.out_pc_plus_4 <= mlif.out_pc_plus_4;
+				mlif.out_portout <= mlif.out_portout;
+				mlif.out_regWEN <= mlif.out_regWEN;
+				mlif.out_halt <= mlif.out_halt;
+				mlif.out_Jump <= mlif.out_Jump;
+				mlif.out_JAL <= mlif.out_JAL;
+				mlif.out_MemtoReg <= mlif.out_MemtoReg;
+				mlif.out_wsel <= mlif.out_wsel;
+				mlif.out_jaddr <= mlif.out_jaddr;
+				mlif.out_dload <= mlif.out_dload;
 			end
 		end
 
