@@ -135,7 +135,7 @@ module datapath (
 	assign mlif.dload = dpif.dmemload;
 	assign mlif.flush = 0;
 	assign mlif.en = en;
-	assign mlif.dhit = dpif.dhit && elif.dREN;
+	assign mlif.dhit = dpif.dhit;
 
 	assign bsel = (elif.zero & elif.Branch) | (~elif.zero & elif.bne);
 

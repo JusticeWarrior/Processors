@@ -25,6 +25,11 @@ module memory_latch (
 			internal_dload <= '0;
 		end
 		else begin
+			if (mlif.dhit)
+				internal_dload <= mlif.dload;
+			else
+				internal_dload <= internal_dload;
+
 			if(mlif.flush) begin
 				mlif.out_pc_plus_4 <= 0;
 				mlif.out_portout <= 0;
@@ -48,6 +53,7 @@ module memory_latch (
 				mlif.out_MemtoReg <= mlif.MemtoReg;
 				mlif.out_wsel <= mlif.wsel;
 				mlif.out_jaddr <= mlif.jaddr;
+				//mlif.out_dload <= mlif.dload;
 				mlif.out_dload <= internal_dload;
 			end
 			else begin
@@ -61,9 +67,6 @@ module memory_latch (
 				mlif.out_wsel <= mlif.out_wsel;
 				mlif.out_jaddr <= mlif.out_jaddr;
 				mlif.out_dload <= mlif.out_dload;
-				if (mlif.dhit) begin
-					internal_dload <= mlif.dload;
-				end
 			end
 		end
 	end
