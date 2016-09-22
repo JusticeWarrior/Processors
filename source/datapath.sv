@@ -38,10 +38,10 @@ module datapath (
 	execute_latch_if elif();
 	memory_latch_if mlif();
 
-	logic en;
+	logic en, bsel;
 	regbits_t Rw;
 	word_t Ext_Out, PC, next_PC;
-	
+
 	control_unit _control_unit(CLK, nRST, cuif);
 	ALU _ALU(aluif);
 	register_file _register_file(CLK, nRST, rfif);
@@ -53,16 +53,16 @@ module datapath (
 	assign en = (dpif.ihit & !mlif.out_halt);
 
 	//pc conns
-	PC_Register #(PC_INIT) _PC(CLK, nRST, dpif.ihit, mlif.out_halt, next_PC, PC);
+	PC_Register #(PC_INIT) _PC(CLK, nRST, en, '0, next_PC, PC);
 
 	//fetch register conns
-	assign flif.pc_plus_4 = PC + '4;
+	assign flif.pc_plus_4 = PC + 32'd4;
 	assign flif.imemload = dpif.imemload;
 	assign flif.flush = 0;
 	assign flif.en = en;
 
 	//control unit conns
-	assign cuif.Instr = flif.out_instr;
+	assign cuif.Instr = flif.instr;
 
 	//extender unit conns
 	Extender _Extender(CLK, nRST, cuif.ExtOp, cuif.Upper, cuif.imm16, Ext_Out);
@@ -89,21 +89,23 @@ module datapath (
 	assign dlif.dWEN = cuif.MemWr;
 	assign dlif.ALUop = cuif.ALUCtr;
 	assign dlif.regDst = cuif.RegDst;
-	assign dlif.jaddr = cuif.JR ? rdat1 : {flif.out_pc_plus_4[31:28], cuif.imm26<<2};
+	assign dlif.jaddr = cuif.JR ? rfif.rdat1 : {flif.out_pc_plus_4[31:28], cuif.imm26<<2};
 	assign dlif.JAL = cuif.JAL;
 	assign dlif.flush = 0;
 	assign dlif.en = en;
+	assign dlif.Rd = cuif.Rd;
+	assign dlif.Rt = cuif.Rt;
 
 	//ALU conns
 	assign aluif.ALUOP = dlif.out_ALUop;
-	assign aluif.portA = dlif.out_rdat1;
+	assign aluif.portA = dlif.out_porta;
 	assign aluif.portB = dlif.out_ALUSrc ? dlif.out_extout : dlif.out_rdat2;
 
 	//execute register conns
 	assign elif.pc_plus_4 = dlif.out_pc_plus_4;
 	assign elif.baddr = (dlif.out_pc_plus_4 + (dlif.out_extout << 2));
 	assign elif.zero = aluif.zero;
-	assign elif.portout = aluif.portout;
+	assign elif.portout = aluif.portOut;
 	assign elif.rdat2 = dlif.out_rdat2;
 	assign elif.Branch = dlif.out_Branch;
 	assign elif.bne = dlif.out_bne;
@@ -118,6 +120,7 @@ module datapath (
 	assign elif.jaddr = dlif.out_jaddr;
 	assign elif.flush = 0;
 	assign elif.en = en;
+	assign elif.dhit = dpif.dhit;
 
 	//memory register conns
 	assign mlif.pc_plus_4 = elif.out_pc_plus_4;
@@ -128,10 +131,11 @@ module datapath (
 	assign mlif.JAL = elif.out_JAL;
 	assign mlif.MemtoReg = elif.out_MemtoReg;
 	assign mlif.wsel = elif.out_wsel;
-	assign mlif.jaddr elif.out_jaddr;
-	assign mlif.dload = dpif.dload;
+	assign mlif.jaddr = elif.out_jaddr;
+	assign mlif.dload = dpif.dmemload;
 	assign mlif.flush = 0;
 	assign mlif.en = en;
+	assign mlif.dhit = dpif.dhit && elif.dREN;
 
 	assign bsel = (elif.zero & elif.Branch) | (~elif.zero & elif.bne);
 
@@ -141,7 +145,7 @@ module datapath (
 		else if (bsel)
 			next_PC = elif.out_baddr;
 		else
-			next_PC = mlif.out_pc_plus_4;
+			next_PC = PC + 32'd4;
 	end
 
 	always_comb begin
@@ -161,5 +165,5 @@ module datapath (
 	assign dpif.dmemWEN = elif.out_dWEN & !mlif.out_halt;
 	assign dpif.dmemstore = elif.out_rdat2;
 	assign dpif.dmemaddr = elif.out_portout;
-	
+
 endmodule
