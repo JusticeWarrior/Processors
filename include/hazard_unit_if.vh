@@ -14,19 +14,18 @@ interface hazard_unit_if;
 	// import types
 	import cpu_types_pkg::*;
 
-	logic		hazard_dec, hazard_ex;
-	logic [1:0] rport_dec, rport_ex;
-	regbits_t	wsel_mem, wsel_ex, rsel1_dec, rsel2_dec, rsel1_ex, rsel2_ex;
+	logic		stall;
+	regbits_t	wsel_ex, rsel1_dec, rsel2_dec;
 
 	// request unit ports
 	modport hu (
-		input		wsel_mem, wsel_ex, rsel1_dec, rsel2_dec, rsel1_ex, rsel2_ex,
-		output		hazard_dec, hazard_ex, rport_dec, rport_ex
+		input		wsel_ex, rsel1_dec, rsel2_dec,
+		output		stall
 	);
 	// request unit tb
 	modport tb (
-		input		hazard_dec, hazard_ex, rport_dec, rport_ex,
-		output		wsel_mem, wsel_ex, rsel1_dec, rsel2_dec, rsel1_ex, rsel2_ex
+		input		stall,
+		output		wsel_ex, rsel1_dec, rsel2_dec
 	);
 endinterface
 
