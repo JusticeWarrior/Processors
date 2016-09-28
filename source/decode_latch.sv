@@ -24,12 +24,14 @@ module decode_latch (
 			dlif.out_dREN <= 0;
 			dlif.out_dWEN <= 0;
 			dlif.out_ALUop <= ALU_SLTU;
+			dlif.out_Rd <= '0;
+			dlif.out_Rt <= '0;
 			dlif.out_regDst <= 0;
 			dlif.out_jaddr <= 0;
 			dlif.out_JAL <= 0;
 		end
 		else begin
-			if(flush) begin
+			if(dlif.flush) begin
 				dlif.out_pc_plus_4 <= 0;
 				dlif.out_porta <= 0;
 				dlif.out_rdat2 <= 0;
@@ -44,11 +46,13 @@ module decode_latch (
 				dlif.out_dREN <= 0;
 				dlif.out_dWEN <= 0;
 				dlif.out_ALUop <= ALU_SLTU;
+				dlif.out_Rd <= '0;
+				dlif.out_Rt <= '0;
 				dlif.out_regDst <= 0;
 				dlif.out_jaddr <= 0;
 				dlif.out_JAL <= 0;
 			end
-			else if(en) begin
+			else if(dlif.en) begin
 				dlif.out_pc_plus_4 <= dlif.pc_plus_4;
 				dlif.out_porta <= dlif.rdat1;
 				dlif.out_rdat2 <= dlif.rdat2;
@@ -63,6 +67,8 @@ module decode_latch (
 				dlif.out_dREN <= dlif.dREN;
 				dlif.out_dWEN <= dlif.dWEN;
 				dlif.out_ALUop <= dlif.ALUop;
+				dlif.out_Rd <= dlif.Rd;
+				dlif.out_Rt <= dlif.Rt;
 				dlif.out_regDst <= dlif.regDst;
 				dlif.out_jaddr <= dlif.jaddr;
 				dlif.out_JAL <= dlif.JAL;
@@ -82,10 +88,13 @@ module decode_latch (
 				dlif.out_dREN <= dlif.out_dREN;
 				dlif.out_dWEN <= dlif.out_dWEN;
 				dlif.out_ALUop <= dlif.out_ALUop;
-				dlif.out_regDst <= dlif.out_regDST;
+				dlif.out_Rd <= dlif.out_Rd;
+				dlif.out_Rt <= dlif.out_Rt;
+				dlif.out_regDst <= dlif.out_regDst;
 				dlif.out_jaddr <= dlif.out_jaddr;
 				dlif.out_JAL <= dlif.out_JAL;
 			end
 		end
+	end
 
 endmodule
