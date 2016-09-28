@@ -15,17 +15,17 @@ interface hazard_unit_if;
 	import cpu_types_pkg::*;
 
 	logic		stall;
-	regbits_t	wsel_ex, rsel1_dec, rsel2_dec;
+	regbits_t	wsel_ex, wsel_mem, rsel1_dec, rsel2_dec;
 
 	// request unit ports
 	modport hu (
-		input		wsel_ex, rsel1_dec, rsel2_dec,
+		input		wsel_ex, wsel_mem, rsel1_dec, rsel2_dec,
 		output		stall
 	);
 	// request unit tb
 	modport tb (
 		input		stall,
-		output		wsel_ex, rsel1_dec, rsel2_dec
+		output		wsel_ex, wsel_mem, rsel1_dec, rsel2_dec
 	);
 endinterface
 

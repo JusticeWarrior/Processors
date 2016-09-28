@@ -17,10 +17,18 @@ module hazard_unit (
 	always_comb begin
 		H.stall = '0;
 
-		if (H.wsel_ex == H.rsel1_dec)
-			H.stall = '1;
-		else if (H.wsel_ex == H.rsel2_dec)
-			H.stall = '1;
+		if (H.wsel_ex != '0) begin
+			if (H.wsel_ex == H.rsel1_dec)
+				H.stall = '1;
+			else if (H.wsel_ex == H.rsel2_dec)
+				H.stall = '1;
+		end
+		if (H.wsel_mem != '0) begin
+			if (H.wsel_mem == H.rsel1_dec)
+				H.stall = '1;
+			else if (H.wsel_mem == H.rsel2_dec)
+				H.stall = '1;
+		end
 	end
 
 endmodule

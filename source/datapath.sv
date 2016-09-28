@@ -56,12 +56,12 @@ module datapath (
 	assign en = (dpif.ihit & !mlif.out_halt);
 
 	//pc conns
-	PC_Register #(PC_INIT) _PC(CLK, nRST, en, '0, next_PC, PC);
+	PC_Register #(PC_INIT) _PC(CLK, nRST, ((cuif.Jmp || cuif.JR) && en) || (en && !huif.stall), '0, next_PC, PC);
 
 	//fetch register conns
 	assign flif.pc_plus_4 = PC + 32'd4;
 	assign flif.imemload = dpif.imemload;
-	assign flif.flush = (cuif.Jmp | cuif.JR) | bsel;
+	assign flif.flush = (cuif.Jmp | cuif.JR | cuif.JAL) | bsel;
 	assign flif.en = en & ~huif.stall;
 
 	//control unit conns
@@ -77,7 +77,8 @@ module datapath (
 	assign rfif.rsel2 = cuif.Rt;
 
 	//hazard unit conns
-	assign huif.wel_ex = elif.wsel;
+	assign huif.wsel_ex = (!dlif.out_regDst ? dlif.out_Rd : dlif.out_Rt) & {5{(dlif.out_dREN || dlif.out_regWEN)}};
+	assign huif.wsel_mem = elif.out_wsel & {(elif.out_dREN || elif.out_regWEN), (elif.out_dREN || elif.out_regWEN), (elif.out_dREN || elif.out_regWEN), (elif.out_dREN || elif.out_regWEN), (elif.out_dREN || elif.out_regWEN)};
 	assign huif.rsel1_dec = cuif.Rs;
 	assign huif.rsel2_dec = cuif.Rt;
 
@@ -99,8 +100,8 @@ module datapath (
 	assign dlif.regDst = cuif.RegDst;
 	//assign dlif.jaddr = cuif.JR ? rfif.rdat1 : {flif.out_pc_plus_4[31:28], cuif.imm26<<2};
 	assign dlif.JAL = cuif.JAL;
-	assign dlif.flush = bsel;
-	assign dlif.en = en & ~huif.stall;
+	assign dlif.flush = bsel || huif.stall;
+	assign dlif.en = en;
 	assign dlif.Rd = cuif.Rd;
 	assign dlif.Rt = cuif.Rt;
 
@@ -127,7 +128,7 @@ module datapath (
 	assign elif.wsel = !dlif.out_regDst ? dlif.out_Rd : dlif.out_Rt;
 	//assign elif.jaddr = dlif.out_jaddr;
 	assign elif.flush = bsel;
-	assign elif.en = en & ~huif.stall;
+	assign elif.en = en;
 	assign elif.dhit = dpif.dhit;
 
 	//memory register conns
@@ -145,13 +146,13 @@ module datapath (
 	assign mlif.en = en;
 	assign mlif.dhit = dpif.dhit;
 
-	assign bsel = (elif.zero & elif.Branch) | (~elif.zero & elif.bne);
+	assign bsel = (elif.out_zero & elif.out_Branch) | (~elif.out_zero & elif.out_bne);
 
 	always_comb begin
-		if (cuif.Jmp | cuif.JR)
-			next_PC = cuif.JR ? rfif.rdat1 : {flif.out_pc_plus_4[31:28], cuif.imm26<<2};
-		else if (bsel)
+		if (bsel)
 			next_PC = elif.out_baddr;
+		else if (cuif.Jmp | cuif.JR | cuif.JAL)
+			next_PC = cuif.JR ? rfif.rdat1 : {flif.out_pc_plus_4[31:28], cuif.imm26<<2};
 		else
 			next_PC = PC + 32'd4;
 	end

@@ -35,6 +35,7 @@ module hazard_unit_tb;
 `else
 	hazard_unit DUT(
 		.\huif.wsel_ex (huif.wsel_ex),
+		.\huif.wsel_mem (huif.wsel_mem),
 		.\huif.rsel1_dec (huif.rsel1_dec),
 		.\huif.rsel2_dec (huif.rsel2_dec),
 
@@ -48,6 +49,7 @@ module hazard_unit_tb;
 	initial begin
 	nRST = 1'b0;
 	huif.wsel_ex = '0;
+	huif.wsel_mem = '0;
 	huif.rsel1_dec = '0;
 	huif.rsel2_dec = '0;
 
@@ -61,6 +63,7 @@ module hazard_unit_tb;
 		$display("DIDNT SET INITIAL stall CORRECTLY");
 
 	huif.wsel_ex = 5'd1;
+	huif.wsel_mem = 5'd1;
 	huif.rsel1_dec = 5'd1;
 	huif.rsel2_dec = 5'd1;
 
@@ -70,6 +73,7 @@ module hazard_unit_tb;
 		$display("DIDNT SET INITIAL stall CORRECTLY");
 
 	huif.wsel_ex = 5'd1;
+	huif.wsel_mem = 5'd1;
 	huif.rsel1_dec = 5'd7;
 	huif.rsel2_dec = 5'd1;
 
@@ -79,6 +83,7 @@ module hazard_unit_tb;
 		$display("DIDNT SET INITIAL stall CORRECTLY");
 
 	huif.wsel_ex = 5'd1;
+	huif.wsel_mem = 5'd1;
 	huif.rsel1_dec = 5'd7;
 	huif.rsel2_dec = 5'd3;
 
@@ -88,6 +93,17 @@ module hazard_unit_tb;
 		$display("DIDNT SET INITIAL stall CORRECTLY");
 
 	huif.wsel_ex = 5'd0;
+	huif.wsel_mem = 5'd1;
+	huif.rsel1_dec = 5'd0;
+	huif.rsel2_dec = 5'd1;
+
+	#PERIOD;
+
+	assert (huif.stall == '1) else
+		$display("DIDNT SET INITIAL stall CORRECTLY");
+
+	huif.wsel_ex = 5'd0;
+	huif.wsel_mem = 5'd0;
 	huif.rsel1_dec = 5'd0;
 	huif.rsel2_dec = 5'd1;
 
