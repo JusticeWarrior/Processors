@@ -28,7 +28,7 @@ module execute_latch (
 			elif.out_jaddr <= 0;
 		end
 		else begin
-			if(elif.flush) begin
+			if(elif.flush && elif.en) begin
 				elif.out_pc_plus_4 <= 0;
 				elif.out_baddr <= 0;
 				elif.out_zero <= 0;
