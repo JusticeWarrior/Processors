@@ -16,6 +16,7 @@
 `include "decode_latch_if.vh"
 `include "execute_latch_if.vh"
 `include "memory_latch_if.vh"
+`include "hazard_unit_if.vh"
 
 // alu op, mips op, and instruction type
 `include "cpu_types_pkg.vh"
@@ -37,6 +38,7 @@ module datapath (
 	decode_latch_if dlif();
 	execute_latch_if elif();
 	memory_latch_if mlif();
+	hazard_unit_if huif();
 
 	logic en, bsel;
 	regbits_t Rw;
@@ -49,6 +51,7 @@ module datapath (
 	decode_latch _decode_latch(CLK, nRST, dlif);
 	execute_latch _execute_latch(CLK, nRST, elif);
 	memory_latch _memory_latch(CLK, nRST, mlif);
+	hazard_unit _hazard_unit(CLK, nRST, huif);
 
 	assign en = (dpif.ihit & !mlif.out_halt);
 
@@ -58,8 +61,8 @@ module datapath (
 	//fetch register conns
 	assign flif.pc_plus_4 = PC + 32'd4;
 	assign flif.imemload = dpif.imemload;
-	assign flif.flush = 0;
-	assign flif.en = en;
+	assign flif.flush = (cuif.Jmp | cuif.JR) | bsel;
+	assign flif.en = en & ~huif.stall;
 
 	//control unit conns
 	assign cuif.Instr = flif.instr;
@@ -73,6 +76,11 @@ module datapath (
 	assign rfif.rsel1 = cuif.Rs;
 	assign rfif.rsel2 = cuif.Rt;
 
+	//hazard unit conns
+	assign huif.wel_ex = elif.wsel;
+	assign huif.rsel1_dec = cuif.Rs;
+	assign huif.rsel2_dec = cuif.Rt;
+
 	//decode register conns
 	assign dlif.pc_plus_4 = flif.out_pc_plus_4;
 	assign dlif.rdat1 = rfif.rdat1;
@@ -83,16 +91,16 @@ module datapath (
 	assign dlif.bne = cuif.bne;
 	assign dlif.regWEN = cuif.RegWr;
 	assign dlif.halt = cuif.Halt;
-	assign dlif.Jump = cuif.Jmp | cuif.JR;
+	//assign dlif.Jump = cuif.Jmp | cuif.JR;
 	assign dlif.MemtoReg = cuif.MemtoReg;
 	assign dlif.dREN = cuif.MemRd;
 	assign dlif.dWEN = cuif.MemWr;
 	assign dlif.ALUop = cuif.ALUCtr;
 	assign dlif.regDst = cuif.RegDst;
-	assign dlif.jaddr = cuif.JR ? rfif.rdat1 : {flif.out_pc_plus_4[31:28], cuif.imm26<<2};
+	//assign dlif.jaddr = cuif.JR ? rfif.rdat1 : {flif.out_pc_plus_4[31:28], cuif.imm26<<2};
 	assign dlif.JAL = cuif.JAL;
-	assign dlif.flush = 0;
-	assign dlif.en = en;
+	assign dlif.flush = bsel;
+	assign dlif.en = en & ~huif.stall;
 	assign dlif.Rd = cuif.Rd;
 	assign dlif.Rt = cuif.Rt;
 
@@ -111,15 +119,15 @@ module datapath (
 	assign elif.bne = dlif.out_bne;
 	assign elif.regWEN = dlif.out_regWEN;
 	assign elif.halt = dlif.out_halt;
-	assign elif.Jump = dlif.out_Jump;
+	//assign elif.Jump = dlif.out_Jump;
 	assign elif.JAL = dlif.out_JAL;
 	assign elif.MemtoReg = dlif.out_MemtoReg;
 	assign elif.dREN = dlif.out_dREN;
 	assign elif.dWEN = dlif.out_dWEN;
 	assign elif.wsel = !dlif.out_regDst ? dlif.out_Rd : dlif.out_Rt;
-	assign elif.jaddr = dlif.out_jaddr;
-	assign elif.flush = 0;
-	assign elif.en = en;
+	//assign elif.jaddr = dlif.out_jaddr;
+	assign elif.flush = bsel;
+	assign elif.en = en & ~huif.stall;
 	assign elif.dhit = dpif.dhit;
 
 	//memory register conns
@@ -127,11 +135,11 @@ module datapath (
 	assign mlif.portout = elif.out_portout;
 	assign mlif.regWEN = elif.out_regWEN;
 	assign mlif.halt = elif.out_halt;
-	assign mlif.Jump = elif.out_Jump;
+	//assign mlif.Jump = elif.out_Jump;
 	assign mlif.JAL = elif.out_JAL;
 	assign mlif.MemtoReg = elif.out_MemtoReg;
 	assign mlif.wsel = elif.out_wsel;
-	assign mlif.jaddr = elif.out_jaddr;
+	//assign mlif.jaddr = elif.out_jaddr;
 	assign mlif.dload = dpif.dmemload;
 	assign mlif.flush = 0;
 	assign mlif.en = en;
@@ -140,8 +148,8 @@ module datapath (
 	assign bsel = (elif.zero & elif.Branch) | (~elif.zero & elif.bne);
 
 	always_comb begin
-		if (mlif.out_Jump)
-			next_PC = mlif.out_jaddr;
+		if (cuif.Jmp | cuif.JR)
+			next_PC = cuif.JR ? rfif.rdat1 : {flif.out_pc_plus_4[31:28], cuif.imm26<<2};
 		else if (bsel)
 			next_PC = elif.out_baddr;
 		else
