@@ -14,7 +14,8 @@ interface hazard_unit_if;
 	// import types
 	import cpu_types_pkg::*;
 
-	logic		hazard_dec, hazard_ex, rport_dec, rport_ex;
+	logic		hazard_dec, hazard_ex;
+	logic [1:0] rport_dec, rport_ex;
 	regbits_t	wsel_mem, wsel_ex, rsel1_dec, rsel2_dec, rsel1_ex, rsel2_ex;
 
 	// request unit ports
