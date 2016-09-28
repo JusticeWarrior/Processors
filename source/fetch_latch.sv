@@ -14,7 +14,7 @@ module fetch_latch (
 			flif.out_pc_plus_4 <= 0;
 		end
 		else begin
-			if(flif.flush) begin
+			if(flif.flush && flif.en) begin
 				flif.instr <= 0;
 				flif.out_pc_plus_4 <= 0;
 			end
