@@ -40,7 +40,7 @@ module ALU (
 		if (A.ALUOP == ALU_SLT)
 			A.portOut = ($signed(A.portA) < $signed(A.portB) ? 1'b1 : 1'b0);
 		if (A.ALUOP == ALU_SLTU)
-			A.portOut = ($unsigned(A.portA) < $unsigned(A.portB) ? 1'b1 : 1'b0);
+			A.portOut = ((A.portA) < (A.portB) ? 1'b1 : 1'b0);
 
 		// CREDIT: Martin Zabel - http://stackoverflow.com/questions/34534304/calculating-the-overflow-flag-in-an-alu
 		if (A.ALUOP == ALU_ADD || A.ALUOP == ALU_SUB)

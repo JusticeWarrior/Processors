@@ -204,6 +204,7 @@ module ALU_tb;
 	assert (A.overflow == 1'b0) else
 		$display("Less than unsigned test failed, wrong overflow");
 
+	$display("ALL TESTS FINISHED!");
   end
 
 endmodule

@@ -43,7 +43,7 @@ module datapath (
 
 	logic en, bsel;
 	regbits_t Rw;
-	word_t Ext_Out, PC, next_PC;
+	word_t Ext_Out, PC, next_PC, forward_datB;
 
 	control_unit _control_unit(CLK, nRST, cuif);
 	ALU _ALU(aluif);
@@ -53,7 +53,7 @@ module datapath (
 	execute_latch _execute_latch(CLK, nRST, elif);
 	memory_latch _memory_latch(CLK, nRST, mlif);
 	hazard_unit _hazard_unit(CLK, nRST, huif);
-	//forwarding_unit _forwarding_unit(fuif);
+	forwarding_unit _forwarding_unit(fuif);
 
 	assign en = (dpif.ihit & !mlif.out_halt);
 
@@ -79,8 +79,8 @@ module datapath (
 	assign rfif.rsel2 = cuif.Rt;
 
 	//hazard unit conns
-	assign huif.wsel_ex = (!dlif.out_regDst ? dlif.out_Rd : dlif.out_Rt) & {5{(dlif.out_dREN || dlif.out_regWEN)}};
-	assign huif.wsel_mem = elif.out_wsel & {(elif.out_dREN || elif.out_regWEN), (elif.out_dREN || elif.out_regWEN), (elif.out_dREN || elif.out_regWEN), (elif.out_dREN || elif.out_regWEN), (elif.out_dREN || elif.out_regWEN)};
+	assign huif.wsel_ex = (!dlif.out_regDst ? dlif.out_Rd : dlif.out_Rt) & {5{(dlif.out_dREN || dlif.out_JAL)}};
+	assign huif.wsel_mem = elif.out_wsel & {5{(elif.out_dREN || elif.out_JAL)}};
 	assign huif.rsel1_dec = cuif.Rs;
 	assign huif.rsel2_dec = cuif.Rt;
 
@@ -106,18 +106,45 @@ module datapath (
 	assign dlif.en = en;
 	assign dlif.Rd = cuif.Rd;
 	assign dlif.Rt = cuif.Rt;
+	assign dlif.rsel1 = cuif.Rs;
+	assign dlif.rsel2 = cuif.Rt;
 
 	//ALU conns
 	assign aluif.ALUOP = dlif.out_ALUop;
-	assign aluif.portA = dlif.out_porta;
-	assign aluif.portB = dlif.out_ALUSrc ? dlif.out_extout : dlif.out_rdat2;
+	always_comb begin
+		case (fuif.forwardA)
+			2'b10: begin
+				aluif.portA = elif.out_portout;
+			end
+			2'b01: begin
+				aluif.portA = rfif.wdat;
+			end
+			default: begin
+				aluif.portA = dlif.out_porta;
+			end
+		endcase
+
+
+		case (fuif.forwardB)
+			2'b10: begin
+				forward_datB = elif.out_portout;
+			end
+			2'b01: begin
+				forward_datB = rfif.wdat;
+			end
+			default: begin
+				forward_datB = dlif.out_rdat2;
+			end
+		endcase
+	end
+	assign aluif.portB = dlif.out_ALUSrc ? dlif.out_extout : forward_datB;
 
 	//execute register conns
 	assign elif.pc_plus_4 = dlif.out_pc_plus_4;
 	assign elif.baddr = (dlif.out_pc_plus_4 + (dlif.out_extout << 2));
 	assign elif.zero = aluif.zero;
 	assign elif.portout = aluif.portOut;
-	assign elif.rdat2 = dlif.out_rdat2;
+	assign elif.rdat2 = forward_datB;
 	assign elif.Branch = dlif.out_Branch;
 	assign elif.bne = dlif.out_bne;
 	assign elif.regWEN = dlif.out_regWEN;
@@ -149,7 +176,12 @@ module datapath (
 	assign mlif.dhit = dpif.dhit;
 
 	// forwarding unit
-	//assign
+	assign fuif.regWEN_ex = elif.out_regWEN;
+	assign fuif.regWEN_mem = mlif.out_regWEN;
+	assign fuif.Rd_ex = elif.out_wsel;
+	assign fuif.Rd_mem = mlif.out_wsel;
+	assign fuif.Rs_dec = dlif.out_rsel1;
+	assign fuif.Rt_dec = dlif.out_rsel2;
 
 	assign bsel = (elif.out_zero & elif.out_Branch) | (~elif.out_zero & elif.out_bne);
 

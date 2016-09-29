@@ -103,7 +103,7 @@ module control_unit (
 			C.ALUCtr = ALU_SLT;
 			C.RegWr = '1;
 		end else if (op == SLTIU) begin
-			C.ALUCtr = ALU_SLT;
+			C.ALUCtr = ALU_SLTU;
 			C.RegWr = '1;
 		end else if (op == ANDI) begin
 			C.ALUCtr = ALU_AND;

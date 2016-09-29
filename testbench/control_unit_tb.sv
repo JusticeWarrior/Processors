@@ -508,7 +508,7 @@ module control_unit_tb;
 		$display("1 DIDNT SET RegDst CORRECTLY");
 	assert (cuif.ALUSrc == '1) else
 		$display("1 DIDNT SET ALUSrc CORRECTLY");
-	assert (cuif.ALUCtr == ALU_SLT) else
+	assert (cuif.ALUCtr == ALU_SLTU) else
 		$display("1 DIDNT SET ALUCtr CORRECTLY");
 	assert (cuif.ExtOp == '1) else
 		$display("1 DIDNT SET ExtOp CORRECTLY");
