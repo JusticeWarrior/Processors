@@ -39,6 +39,7 @@ module datapath (
 	execute_latch_if elif();
 	memory_latch_if mlif();
 	hazard_unit_if huif();
+	forwarding_unit_if fuif();
 
 	logic en, bsel;
 	regbits_t Rw;
@@ -52,6 +53,7 @@ module datapath (
 	execute_latch _execute_latch(CLK, nRST, elif);
 	memory_latch _memory_latch(CLK, nRST, mlif);
 	hazard_unit _hazard_unit(CLK, nRST, huif);
+	//forwarding_unit _forwarding_unit(fuif);
 
 	assign en = (dpif.ihit & !mlif.out_halt);
 
@@ -145,6 +147,9 @@ module datapath (
 	assign mlif.flush = 0;
 	assign mlif.en = en;
 	assign mlif.dhit = dpif.dhit;
+
+	// forwarding unit
+	//assign
 
 	assign bsel = (elif.out_zero & elif.out_Branch) | (~elif.out_zero & elif.out_bne);
 
