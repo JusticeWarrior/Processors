@@ -58,7 +58,7 @@ module datapath (
 	assign en = (dpif.ihit & !mlif.out_halt);
 
 	//pc conns
-	PC_Register #(PC_INIT) _PC(CLK, nRST, ((cuif.Jmp || cuif.JR) && en) || (en && !huif.stall), '0, next_PC, PC);
+	PC_Register #(PC_INIT) _PC(CLK, nRST, ((cuif.Jmp || cuif.JR || bsel) && en) || (en && !huif.stall), '0, next_PC, PC);
 
 	//fetch register conns
 	assign flif.pc_plus_4 = PC + 32'd4;
