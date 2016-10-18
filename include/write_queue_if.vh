@@ -19,13 +19,13 @@ interface write_queue_if;
 
 	// request unit ports
 	modport wq (
-		input		ddirtydata, ddirtyaddr, ddirtyWEN, dmisREN, dwait,
+		input		ddirtydata, ddirtyaddr, ddirtyWEN, dmissREN, dwait,
 		output		wempty, full, wdaddr, dqueueWEN, dstore
 	);
 	// request unit tb
 	modport tb (
 		input		wempty, full, wdaddr, dqueueWEN, dstore,
-		output		ddirtydata, ddirtyaddr, ddirtyWEN, dmisREN, dwait
+		output		ddirtydata, ddirtyaddr, ddirtyWEN, dmissREN, dwait
 	);
 endinterface
 
