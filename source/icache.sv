@@ -15,7 +15,7 @@ module icache (
 	
 	parameter CPUS = 1;
 	
-	typedef enum bit {FETCH, HIT} state_t;
+	typedef enum bit {FETCH, CHECK} state_t;
 	state_t state;
 	state_t next_state;
 
@@ -39,21 +39,26 @@ module icache (
 
 	always_ff @ (posedge CLK, negedge nRST) begin
 		if (!nRST) begin
-			state <= FETCH;
+			state <= CHECK;
 			valid <= '0;
 		end
 		else begin
-			state <= next_state;
-			valid[iaddr.idx] <= next_valid;
-			data[iaddr.idx] <= next_data;
-			tag[iaddr.idx] <= next_tag;
+			state <= next_state;	
+			if (!ccif.iwait) begin
+				valid[iaddr.idx] <= next_valid;
+				data[iaddr.idx] <= next_data;
+				tag[iaddr.idx] <= next_tag;
+			end
 		end
 	end
 
 	always_comb begin
 		next_state = state;
+		next_valid = 1'b0;	
+		next_data = '0;
+		next_tag = '0;
 		casez (state)
-			HIT: begin
+			CHECK: begin
 				if(!ccif.iwait) begin
 					next_valid = 1'b1;	
 					next_data = ccif.iload;
@@ -61,7 +66,7 @@ module icache (
 					next_state = FETCH;
 				end
 				else begin
-					next_state = HIT;	
+					next_state = CHECK;	
 				end
 			end
 			FETCH: begin
@@ -69,7 +74,7 @@ module icache (
 					next_state = FETCH;
 				end
 				else begin
-					next_state = HIT;
+					next_state = CHECK;
 				end
 			end
 		endcase

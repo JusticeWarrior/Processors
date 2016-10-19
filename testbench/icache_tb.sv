@@ -31,7 +31,7 @@ module icache_tb;
   	test PROG (CLK, nRST, ccif, rif, dcif);
 
 	// dut
-	ram RAM (CLK, nRST, rif);
+	ram #(.LAT(3)) RAM (CLK, nRST, rif);
 	memory_control MC (CLK, nRST, ccif);
 	icache DUT (CLK, nRST, dcif, ccif);
 
@@ -42,8 +42,6 @@ module icache_tb;
 	assign rif.ramREN = ccif.ramREN;
 	assign rif.ramWEN = ccif.ramWEN;
 endmodule
-
-// _____________________________ START TESTING ____________________________________//
 
 program test(
 	input logic CLK,
@@ -63,8 +61,8 @@ program test(
 	nRST = 1'b0;
     	#(2*PERIOD);
     	nRST = 1'b1;
-   	//ccif.dREN = 0;
-   	//ccif.dWEN = 0;
+   	ccif.cif0.dREN = 0;
+   	ccif.cif0.dWEN = 0;
    	#(PERIOD);
     
     	$display("Loading Instruction 0x0000 from MEMORY");
@@ -75,24 +73,31 @@ program test(
     	dcif.dmemWEN = '0;
  	@(posedge dcif.ihit);
 	$display("Instruction loaded from MEMORY");
+	$display("%b\n", dcif.imemload);
 	$display("Loading Instruction 0x0004 from MEMORY");
 	@(posedge CLK);
     	dcif.imemaddr = 32'h0004;
 	@(posedge dcif.ihit);
 	$display("Instruction loaded from MEMORY");
+	$display("%b\n", dcif.imemload);
 	$display("Reloading Instruction 0x0000 from CACHE");
 	@(posedge CLK);
     	dcif.imemaddr = 32'h0000;
-	@(posedge CLK);
-	if(!dcif.ihit)
+	if(!dcif.ihit) begin
 		$display("ERROR: Instruction not loaded from CACHE in single cycle");
-	else
+		@(posedge dcif.ihit);
+		@(posedge CLK);
+	end
+	else begin
+		@(posedge CLK);
 		$display("Instruction loaded from CACHE");
+		$display("%b\n", dcif.imemload);
+	end
 	$display("Overwriting Instruction at Index 0");
-	@(posedge CLK);
     	dcif.imemaddr = 32'h0100;
 	@(posedge dcif.ihit);
 	$display("Instruction loaded from MEMORY");
+	$display("%b\n", dcif.imemload);
 	$display("Loading Instruction 0x0000 from MEMORY");
 	@(posedge CLK);
     	dcif.imemaddr = 32'h0000;
@@ -102,7 +107,9 @@ program test(
 	else begin
 		@(posedge dcif.ihit)
  		$display("Instruction loaded from MEMORY");
+		$display("%b\n", dcif.imemload);
 	end
+	@(posedge CLK);
     	$finish;
     end
 endprogram 
