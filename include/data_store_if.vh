@@ -9,17 +9,17 @@ interface access_logic_if;
 	import cpu_types_pkg::*;
 
 	logic          hit, halt, full, ddirtyWEN, dmissREN, dwait;
-  	word_t         ddata, daddr, ddirtydata, ddirtyaddr, rdaddr, dload;
+  	word_t         ddata, daddr, ddirtydata, ddirtyaddr, rdaddr, dload, daccessstore;
 
 	// access logic ports
 	modport ds (
-		input	dREN, dWEN, halt, full, daddr, dwait, dload,
+		input	dREN, dWEN, halt, full, daddr, dwait, dload, daccessstore,
 		output	ddata, hit, ddirtydata, ddirtyaddr, ddirtyWEN, dmissREN, rdaddr
 	);
 	// access logic tb
 	modport tb (
 		input	ddata, hit, ddirtydata, ddirtyaddr, ddirtyWEN, dmissREN, rdaddr,
-		output	dREN, dWEN, halt, full, daddr, dwait, dload
+		output	dREN, dWEN, halt, full, daddr, dwait, dload, daccessstore
 	);
 endinterface
 
