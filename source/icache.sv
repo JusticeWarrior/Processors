@@ -1,6 +1,6 @@
 // interface include
 `include "datapath_cache_if.vh"
-`include "cache_control_if.vh"
+`include "caches_if.vh"
 
 // memory types
 `include "cpu_types_pkg.vh"
@@ -8,7 +8,7 @@
 module icache (
 	input logic CLK, nRST,
 	datapath_cache_if dcif,
-	cache_control_if ccif
+	caches_if cif
 );
 	
 	import cpu_types_pkg::*;
@@ -34,8 +34,8 @@ module icache (
 	assign dcif.ihit = valid[iaddr.idx] && dcif.imemREN && (tag[iaddr.idx] == iaddr.tag);
 	assign dcif.imemload = data[iaddr.idx];
 	
-	assign ccif.cif0.iREN = dcif.imemREN && !dcif.ihit;
-	assign ccif.cif0.iaddr = dcif.imemaddr;
+	assign cif.iREN = dcif.imemREN && !dcif.ihit;
+	assign cif.iaddr = dcif.imemaddr;
 
 	always_ff @ (posedge CLK, negedge nRST) begin
 		if (!nRST) begin
@@ -44,7 +44,7 @@ module icache (
 		end
 		else begin
 			state <= next_state;	
-			if (!ccif.iwait) begin
+			if (!cif.iwait) begin
 				valid[iaddr.idx] <= next_valid;
 				data[iaddr.idx] <= next_data;
 				tag[iaddr.idx] <= next_tag;
@@ -59,9 +59,9 @@ module icache (
 		next_tag = '0;
 		casez (state)
 			CHECK: begin
-				if(!ccif.iwait) begin
+				if(!cif.iwait) begin
 					next_valid = 1'b1;	
-					next_data = ccif.iload;
+					next_data = cif.iload;
 					next_tag = iaddr.tag;
 					next_state = FETCH;
 				end

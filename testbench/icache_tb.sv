@@ -33,7 +33,7 @@ module icache_tb;
 	// dut
 	ram #(.LAT(3)) RAM (CLK, nRST, rif);
 	memory_control MC (CLK, nRST, ccif);
-	icache DUT (CLK, nRST, dcif, ccif);
+	icache DUT (CLK, nRST, dcif, cif0);
 
 	assign rif.ramaddr = ccif.ramaddr;
 	assign ccif.ramload = rif.ramload;
