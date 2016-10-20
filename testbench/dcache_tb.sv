@@ -61,8 +61,7 @@ program test(
 	nRST = 1'b0;
     	#(2*PERIOD);
     	nRST = 1'b1;
-   	ccif.cif0.dREN = 0;
-   	ccif.cif0.dWEN = 0;
+		dcif.halt = 0;
    	#(PERIOD);
 
     	$display("Loading Data 0x4000 from MEMORY");
@@ -72,91 +71,113 @@ program test(
 	dcif.imemREN = '0;
     	dcif.dmemWEN = '0;
  	@(posedge dcif.dhit);
+	dcif.dmemREN = 0;
 	$display("Data loaded from MEMORY");
 	$display("%b\n", dcif.dmemload);
-	$display("Loading Data 0x4004 from MEMORY");
+	$display("Loading Data 0x4008 from MEMORY");
 	@(posedge CLK);
-    	dcif.dmemaddr = 32'h4004;
+		dcif.dmemREN = 1;
+    	dcif.dmemaddr = 32'h4008;
 	@(posedge CLK);
-	if (!dcif.dhit) begin
-		$display("ERROR: Data not loaded from CACHE in single cycle");
-		@(posedge dcif.dhit);
-		@(posedge CLK);
+	if (dcif.dhit) begin
+		$display("ERROR: Data not loaded from memory");
 	end
+	else
+		@(posedge dcif.dhit);
+
+	dcif.dmemREN = 0;
 	$display("Data loaded from MEMORY");
 	$display("%b\n", dcif.dmemload);
 	$display("Reloading Data 0x4000 from CACHE");
 	@(posedge CLK);
     	dcif.dmemaddr = 32'h4000;
+		dcif.dmemREN = 1;
 	@(posedge CLK);
 	if(!dcif.dhit) begin
 		$display("ERROR: Data not loaded from CACHE in single cycle");
 		@(posedge dcif.dhit);
-		@(posedge CLK);
 	end
 	else begin
 		$display("Data loaded from CACHE");
 		$display("%b\n", dcif.dmemload);
-		@(posedge CLK);
 	end
+	@(posedge CLK);
+	dcif.dmemREN = 0;
+
 	$display("Adding Data at Index 0 to the second set");
-    	dcif.dmemaddr = 32'h4100;
+    	dcif.dmemaddr = 32'h6000;
+		dcif.dmemREN = 1;
 	@(posedge dcif.dhit);
+
+	dcif.dmemREN = 0;
 	$display("Data loaded from MEMORY");
 	$display("%b\n", dcif.dmemload);
-	$display("Loading Data 0x4000 from MEMORY");
+	$display("Loading Data 0x4000 from CACHE");
 	@(posedge CLK);
     	dcif.dmemaddr = 32'h4000;
+		dcif.dmemREN = 1;
 	@(posedge CLK);
 	if(!dcif.dhit) begin
-		$display("ERROR: Data not loaded from CACHE in single cycle");
-		@(posedge dcif.dhit)
+		$display("ERROR: Failed to load from CACHE in single cycle");
+		@(posedge dcif.dhit);
 	end
 	else begin
- 		$display("Data loaded from MEMORY");
+ 		$display("Data loaded from CACHE");
 		$display("%b\n", dcif.dmemload);
-		$display("Writing Data 0x4000 to MEMORY");
 	end
+
+	dcif.dmemREN = 0;
 	@(posedge CLK);
+		$display("Writing Data 0x4000 to CACHE");
     	dcif.dmemREN = 0;
     	dcif.dmemWEN = 1;
     	dcif.dmemstore = 32'd5;
-	@(posedge dcif.dhit)
-	$display("Loading Data 0x4000 from MEMORY");
+	@(posedge CLK);
+		if(!dcif.dhit) begin
+			$display("ERROR: Failed to write to CACHE in single cycle");
+			@(posedge dcif.dhit);
+		end
+	@(posedge CLK);
+	$display("Loading Data 0x4000 from CACHE");
+    	dcif.dmemREN = 1;
+    	dcif.dmemWEN = 0;
+	@(posedge CLK);
+	if(!dcif.dhit) begin
+		$display("ERROR: Failed to load from CACHE in single cycle");
+		@(posedge dcif.dhit);
+	end
+
+    dcif.dmemREN = 0;
+	if(dcif.dmemload != 32'd5)
+		$display("ERROR: Data not correct");
+	@(posedge CLK);
+	$display("Writing Data 0x4008 to CACHE");
+    	dcif.dmemaddr = 32'h4008;
+    	dcif.dmemREN = 0;
+    	dcif.dmemWEN = 1;
+    	dcif.dmemstore = 32'd5;
+	@(posedge CLK);
+	$display("Loading Data 0x4008 from CACHE");
     	dcif.dmemREN = 1;
     	dcif.dmemWEN = 0;
 	@(posedge CLK);
 	if(!dcif.dhit) begin
 		$display("ERROR: Data not loaded from CACHE in single cycle");
-		@(posedge dcif.dhit)
+		@(posedge dcif.dhit);
 	end
+	@(posedge CLK);
 	if(dcif.dmemload != 32'd5)
 		$display("ERROR: Data not correct");
-	$display("Writing Data 0x4004 to MEMORY");
+
+    dcif.dmemREN = 0;
 	@(posedge CLK);
-    	dcif.dmemaddr = 32'h4004;
-    	dcif.dmemREN = 0;
-    	dcif.dmemWEN = 1;
-    	dcif.dmemstore = 32'd5;
-	@(posedge dcif.dhit)
-	$display("Loading Data 0x4004 from MEMORY");
-    	dcif.dmemREN = 1;
-    	dcif.dmemWEN = 0;
-	@(posedge CLK);
-	if(dcif.dhit) begin
-		$display("ERROR: Data loaded from CACHE in single cycle");
-		@(posedge dcif.dhit)
-	end
-	@(posedge dcif.dhit)
-	if(dcif.dmemload != 32'd5)
-		$display("ERROR: Data not correct");
-	@(posedge CLK);
-    	dcif.dmemREN = 0;
+	$display("HALTING");
 		dcif.halt = 1;
-	##10;
+	#(400*PERIOD);
 	if(!dcif.flushed)
 		$display("ERROR: Cache did not flush after halting");
 	@(posedge CLK);
+		$display("All finished!");
     	$finish;
     end
 endprogram
