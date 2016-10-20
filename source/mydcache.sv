@@ -59,6 +59,16 @@ module mydcache (
 			flush_index <= '0;
 			block1_flushed <= 0;
 			block2_flushed <= 0;
+			for (int i = 0; i < 8; i = i + 1) begin
+				block1[0][i] <= '0;
+				block1[1][i] <= '0;
+				block2[0][i] <= '0;
+				block2[1][i] <= '0;
+			end
+			for (int i = 0; i < 8; i = i + 1) begin
+				tag1[i] <= '0;
+				tag2[i] <= '0;
+			end
 		end
 		else begin
 			state <= next_state;
@@ -233,11 +243,8 @@ module mydcache (
 		next_data22 = block2[1][daddr.idx];
 		casez(state)
 			IDLE: begin
-				dcif.dmemload = '0;
-				cif.dstore = '0;
 				cif.dREN = 0;
 				cif.dWEN = 0;
-				cif.daddr = '0;
 			end
 			RHIT: begin
 				if(dcif.dhit) begin
