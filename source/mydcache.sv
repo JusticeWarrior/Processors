@@ -244,13 +244,13 @@ module mydcache (
 					next_hitcount = hitcount + 1;
 					if (tag1[daddr.idx] == daddr.tag) begin
 						dcif.dmemload = block1[daddr.blkoff][daddr.idx];
-						next_lru1 = 0;
-						next_lru2 = 1;
+						//next_lru1 = 0;
+						//next_lru2 = 1;
 					end
 					else begin
 						dcif.dmemload = block2[daddr.blkoff][daddr.idx];
-						next_lru1 = 1;
-						next_lru2 = 0;
+						//next_lru1 = 1;
+						//next_lru2 = 0;
 					end
 				end
 			end
@@ -274,35 +274,53 @@ module mydcache (
 			LOAD1: begin
 				cif.dREN = 1;
 				cif.dWEN = 0;
-				cif.daddr = dcif.dmemaddr;
+				if(!daddr.blkoff) begin
+					cif.daddr = dcif.dmemaddr;
+					dcif.dmemload = cif.dload;
+				end
+				else begin
+					cif.daddr = dcif.dmemaddr - 4;
+				end
 				if(lru1[daddr.idx]) begin
 					next_tag1 = daddr.tag;
-					next_valid1 = 1;
-					next_data11 = dcif.dmemstore;
+					if (dcif.dmemWEN)
+						next_valid1 = 1;
+					else
+						next_valid1 = 0;
+					next_data11 = cif.dload;
 				end
 				else begin
 					next_tag2 = daddr.tag;
-					next_valid2 = 1;
-					next_data21 = dcif.dmemstore;
+					if (dcif.dmemWEN)
+						next_valid2 = 1;
+					else
+						next_valid2 = 0;
+					next_data21 = cif.dload;
 				end
 			end
 			LOAD2: begin
 				cif.dREN = 1;
 				cif.dWEN = 0;
-				cif.daddr = dcif.dmemaddr + 32'h4;
+				if(!daddr.blkoff) begin
+					cif.daddr = dcif.dmemaddr + 4;
+				end
+				else begin
+					cif.daddr = dcif.dmemaddr;
+					dcif.dmemload = cif.dload;
+				end
 				if(lru1[daddr.idx]) begin
 					next_tag1 = daddr.tag;
-					next_lru1 = 0;
-					next_lru2 = 1;
+					//next_lru1 = 0;
+					//next_lru2 = 1;
 					next_valid1 = 1;
-					next_data12 = dcif.dmemstore;
+					next_data12 = cif.dload;
 				end
 				else begin
 					next_tag2 = daddr.tag;
-					next_lru1 = 1;
-					next_lru2 = 0;
+					//next_lru1 = 1;
+					//next_lru2 = 0;
 					next_valid2 = 1;
-					next_data22 = dcif.dmemstore;
+					next_data22 = cif.dload;
 				end
 			end	
 			STORE1:	begin//todo: FLUSHING
