@@ -99,7 +99,7 @@ program test(
 		$display("%b\n", dcif.dmemload);
 		@(posedge CLK);
 	end
-	$display("Overwriting Data at Index 0");
+	$display("Adding Data at Index 0 to the second set");
     	dcif.dmemaddr = 32'h4100;
 	@(posedge dcif.dhit);
 	$display("Data loaded from MEMORY");
@@ -108,13 +108,54 @@ program test(
 	@(posedge CLK);
     	dcif.dmemaddr = 32'h4000;
 	@(posedge CLK);
-	if(!dcif.dhit)
+	if(!dcif.dhit) begin
 		$display("ERROR: Data not loaded from CACHE in single cycle");
 		@(posedge dcif.dhit)
+	end
 	else begin
  		$display("Data loaded from MEMORY");
 		$display("%b\n", dcif.dmemload);
+		$display("Writing Data 0x4000 to MEMORY");
 	end
+	@(posedge CLK);
+    	dcif.dmemREN = 0;
+    	dcif.dmemWEN = 1;
+    	dcif.dmemstore = 32'd5;
+	@(posedge dcif.dhit)
+	$display("Loading Data 0x4000 from MEMORY");
+    	dcif.dmemREN = 1;
+    	dcif.dmemWEN = 0;
+	@(posedge CLK);
+	if(!dcif.dhit) begin
+		$display("ERROR: Data not loaded from CACHE in single cycle");
+		@(posedge dcif.dhit)
+	end
+	if(dcif.dmemload != 32'd5)
+		$display("ERROR: Data not correct");
+	$display("Writing Data 0x4004 to MEMORY");
+	@(posedge CLK);
+    	dcif.dmemaddr = 32'h4004;
+    	dcif.dmemREN = 0;
+    	dcif.dmemWEN = 1;
+    	dcif.dmemstore = 32'd5;
+	@(posedge dcif.dhit)
+	$display("Loading Data 0x4004 from MEMORY");
+    	dcif.dmemREN = 1;
+    	dcif.dmemWEN = 0;
+	@(posedge CLK);
+	if(dcif.dhit) begin
+		$display("ERROR: Data loaded from CACHE in single cycle");
+		@(posedge dcif.dhit)
+	end
+	@(posedge dcif.dhit)
+	if(dcif.dmemload != 32'd5)
+		$display("ERROR: Data not correct");
+	@(posedge CLK);
+    	dcif.dmemREN = 0;
+		dcif.halt = 1;
+	##10;
+	if(!dcif.flushed)
+		$display("ERROR: Cache did not flush after halting");
 	@(posedge CLK);
     	$finish;
     end
