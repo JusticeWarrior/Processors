@@ -15,7 +15,7 @@ module caches (
   // icache
   icache  ICACHE(CLK, nRST, dcif, cif);
   // dcache
-  mydcache  DCACHE(CLK, nRST, dcif, cif);
+  dcache  DCACHE(CLK, nRST, dcif, cif);
 
   // dcache invalidate before halt handled by dcache when exists
   //assign dcif.flushed = dcif.halt;

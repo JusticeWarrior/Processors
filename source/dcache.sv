@@ -5,7 +5,7 @@
 // memory types
 `include "cpu_types_pkg.vh"
 //todo: flushing - write dirty entries to memory and invalidate
-module mydcache (
+module dcache (
 	input logic CLK, nRST,
 	datapath_cache_if dcif,
 	caches_if cif
