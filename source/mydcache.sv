@@ -12,12 +12,12 @@ module mydcache (
 );
 	import cpu_types_pkg::*;
 	
-	typedef enum bit [4:0] {IDLE, RHIT, WHIT, LOAD1, LOAD2, STORE1, STORE2, WCACHE, WCOUNT, HALT} state_t;
+	typedef enum bit [4:0] {IDLE, RHIT, WHIT, LOAD1, LOAD2, STORE1, STORE2, WCACHE, WCOUNT, HALT, WAIT1, WAIT2} state_t;
 	state_t state, next_state;
 
 	word_t [7:0] block1[1:0];
 	word_t [7:0] block2[1:0];
-	word_t next_data;
+	word_t next_data11, next_data12, next_data21, next_data22;
 	//word_t b1w1[7:0], b1w2[7:0], b2w1[7:0], b2w2[7:0];
 
 	word_t hitcount, next_hitcount;
@@ -31,6 +31,8 @@ module mydcache (
 	logic [7:0] lru1;
 	logic [7:0] lru2;
 	logic next_lru1, next_lru2;
+
+	logic force_write1, force_write2;
 
 	logic [25:0] tag1[7:0];
 	logic [25:0] tag2[7:0];
@@ -52,7 +54,7 @@ module mydcache (
 			dirty1 <= '0;
 			dirty2 <= '0;
 			lru1 <= '1;
-			lru2 <= '1;
+			lru2 <= '0;
 			hitcount <= '0;
 			flush_index <= '0; 
 			block1_flushed <= 0;
@@ -60,22 +62,27 @@ module mydcache (
 		end
 		else begin
 			state <= next_state;
+			tag1[daddr.idx] <= next_tag1;
+			tag2[daddr.idx] <= next_tag2;
 			valid1[daddr.idx] <= next_valid1; 
 			valid2[daddr.idx] <= next_valid2;
 			dirty1[daddr.idx] <= next_dirty1;
 			dirty2[daddr.idx] <= next_dirty2;
-			lru1[daddr.idx] <= next_lru1 ^ !lru2[daddr.idx];
-			lru2[daddr.idx] <= next_lru2 ^ !lru1[daddr.idx];
+			lru1[daddr.idx] <= next_lru1;
+			lru2[daddr.idx] <= next_lru2;
 			hitcount <= next_hitcount;
 			flush_index <= next_flush_index;
 			block1_flushed <= next_block1_flushed;
 			block2_flushed <= next_block2_flushed;
-			block1[daddr.blkoff][daddr.idx] <= lru1[daddr.idx] ? next_data:block1[daddr.blkoff][daddr.idx];
-			block2[daddr.blkoff][daddr.idx] <= lru2[daddr.idx] ? next_data:block2[daddr.blkoff][daddr.idx];
+			block1[0][daddr.idx] <= next_data11;
+			block1[1][daddr.idx] <= next_data12;
+			block2[0][daddr.idx] <= next_data21;
+			block2[1][daddr.idx] <= next_data22;
 		end
 	end
 
 	always_comb begin
+		next_flush_index = flush_index;
 		casez (state)
 			IDLE: begin
 				if (dcif.halt) begin
@@ -118,7 +125,12 @@ module mydcache (
 			end
 			LOAD1: begin
 				if (!cif.dwait) begin
-					next_state = LOAD2;
+					if (dcif.dmemWEN) begin
+						next_state = IDLE;
+					end
+					else begin
+						next_state = LOAD2;
+					end
 				end
 				else begin
 					next_state = LOAD1;
@@ -139,7 +151,7 @@ module mydcache (
 							next_state = WCOUNT;
 						end
 						else begin
-							next_state = STORE2;
+							next_state = WAIT1;
 						end
 					end
 					else begin
@@ -148,17 +160,21 @@ module mydcache (
 				end
 				else begin
 					if (!cif.dwait) begin
-						next_state = STORE2;
+						next_state = WAIT1;
 					end
 					else begin
 						next_state = STORE1;
 					end
 				end
 			end
+			WAIT1: begin//todo: FLUSHING
+				next_state = STORE2;
+			end
 			STORE2: begin//todo: FLUSHING
 				if (dcif.halt) begin
 					if (!cif.dwait) begin
-						next_state = STORE1;
+						next_state = WAIT2;
+						next_flush_index = flush_index + 1;
 					end
 					else begin
 						next_state = STORE2;
@@ -172,6 +188,9 @@ module mydcache (
 						next_state = STORE2;
 					end
 				end
+			end
+			WAIT2: begin//todo: FLUSHING
+				next_state = STORE1;
 			end
 			WCACHE: begin
 				if (daddr.blkoff) begin
@@ -205,10 +224,13 @@ module mydcache (
 		next_tag1 = tag1[daddr.idx];
 		next_tag2 =  tag2[daddr.idx];
 		next_hitcount = hitcount;
-		next_flush_index = flush_index;
 		next_block1_flushed = block1_flushed;
 		next_block2_flushed = block2_flushed;
 		dcif.flushed = 0;
+		next_data11 = block1[0][daddr.idx];
+		next_data12 = block1[1][daddr.idx];
+		next_data21 = block2[0][daddr.idx];
+		next_data22 = block2[1][daddr.idx];
 		casez(state)	
 			IDLE: begin
 				dcif.dmemload = '0;
@@ -222,61 +244,82 @@ module mydcache (
 					next_hitcount = hitcount + 1;
 					if (tag1[daddr.idx] == daddr.tag) begin
 						dcif.dmemload = block1[daddr.blkoff][daddr.idx];
+						next_lru1 = 0;
+						next_lru2 = 1;
 					end
 					else begin
 						dcif.dmemload = block2[daddr.blkoff][daddr.idx];
+						next_lru1 = 1;
+						next_lru2 = 0;
 					end
 				end
 			end
 			WHIT: begin
 				if(dcif.dhit) begin
 					next_hitcount = hitcount + 1;
-					next_data = dcif.dmemstore;
+					if ((tag1[daddr.idx] == daddr.tag) && valid1[daddr.idx]) begin
+						if(!daddr.blkoff)
+							next_data11 = dcif.dmemstore;
+						else 
+							next_data12 = dcif.dmemstore;
+					end
+					else begin
+						if(!daddr.blkoff)
+							next_data21 = dcif.dmemstore;
+						else 
+							next_data22 = dcif.dmemstore;
+					end
 				end
 			end
 			LOAD1: begin
 				cif.dREN = 1;
+				cif.dWEN = 0;
 				cif.daddr = dcif.dmemaddr;
-				next_data = cif.dload;
 				if(lru1[daddr.idx]) begin
 					next_tag1 = daddr.tag;
-					next_lru1 = 0;
 					next_valid1 = 1;
+					next_data11 = dcif.dmemstore;
 				end
 				else begin
 					next_tag2 = daddr.tag;
-					next_lru2 = 0;
 					next_valid2 = 1;
+					next_data21 = dcif.dmemstore;
 				end
 			end
 			LOAD2: begin
 				cif.dREN = 1;
+				cif.dWEN = 0;
 				cif.daddr = dcif.dmemaddr + 32'h4;
-				next_data = cif.dload;
 				if(lru1[daddr.idx]) begin
 					next_tag1 = daddr.tag;
 					next_lru1 = 0;
+					next_lru2 = 1;
 					next_valid1 = 1;
+					next_data12 = dcif.dmemstore;
 				end
 				else begin
 					next_tag2 = daddr.tag;
+					next_lru1 = 1;
 					next_lru2 = 0;
 					next_valid2 = 1;
+					next_data22 = dcif.dmemstore;
 				end
 			end	
 			STORE1:	begin//todo: FLUSHING
 				cif.dWEN = 1;
+				cif.dREN = 0;
 				if(dcif.halt) begin
 					if (!block1_flushed) begin
-						cif.dstore = block1[0][flush_index];
-						cif.daddr = {tag1[flush_index], flush_index, '0};
+						if(valid1[flush_index] && dirty1[flush_index]) begin
+							cif.dstore = block1[0][flush_index];
+							cif.daddr = {tag1[flush_index], flush_index, '0};
+						end
 					end
 					else if (!block2_flushed) begin
-						cif.dstore = block2[0][flush_index];
-						cif.daddr = {tag2[flush_index], flush_index, '0};
-					end
-					else begin
-						cif.dWEN = 0;
+						if(valid2[flush_index] && dirty2[flush_index]) begin
+							cif.dstore = block2[0][flush_index];
+							cif.daddr = {tag2[flush_index], flush_index, '0};
+						end
 					end
 				end
 				else begin
@@ -290,22 +333,30 @@ module mydcache (
 					end
 				end
 			end
+			WAIT1: begin
+				cif.dWEN = 0;
+			end
 			STORE2: begin//todo: FLUSHING
 				cif.dWEN = 1;
+				cif.dREN = 0;
 				if(dcif.halt) begin
-					next_flush_index = flush_index + 1;
-					if (flush_index == 'd7 && !block1_flushed) begin
-						cif.dstore = block1[1][flush_index];
-						cif.daddr = {tag1[flush_index], flush_index, '0};
-						next_block1_flushed = 1;
+					if (!block1_flushed) begin
+						if(valid1[flush_index] && dirty1[flush_index]) begin
+							cif.dstore = block1[1][flush_index];
+							cif.daddr = {tag1[flush_index], flush_index, '0};
+						end
+						if (!cif.dwait && (flush_index == 7)) begin
+							next_block1_flushed = 1;
+						end	
 					end
-					else if (flush_index == 'd7 && !block2_flushed) begin
-						cif.dstore = block2[1][flush_index];
-						cif.daddr = {tag2[flush_index], flush_index, '0};
-						next_block2_flushed = 1;
-					end
-					else begin
-						cif.dWEN = 0;
+					else if (!block2_flushed) begin
+						if(valid2[flush_index] && dirty2[flush_index]) begin
+							cif.dstore = block2[1][flush_index];
+							cif.daddr = {tag2[flush_index], flush_index, '0};
+						end
+						if (!cif.dwait && (flush_index == 7)) begin
+							next_block2_flushed = 1;
+						end
 					end
 				end
 				else begin
@@ -319,8 +370,27 @@ module mydcache (
 					end
 				end
 			end
+			WAIT2: begin
+				cif.dWEN = 0;
+			end
 			WCACHE: begin
-				next_data = dcif.dmemstore; 
+				cif.dREN = 0;
+				cif.dWEN = 0;
+				if (lru1[daddr.idx]) begin
+					next_dirty1 = '1;
+					if(!daddr.blkoff)
+						next_data11 = dcif.dmemstore;
+					else 
+						next_data12 = dcif.dmemstore;
+				end
+				else begin
+					next_dirty2 = '1;
+					if(!daddr.blkoff)
+						next_data21 = dcif.dmemstore;
+					else 
+						next_data22 = dcif.dmemstore;
+				end
+				
 			end
 			WCOUNT: begin
 				cif.dWEN = 1;
