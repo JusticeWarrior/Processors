@@ -10,6 +10,9 @@ add wave -noupdate /system_tb/DUT/CPU/dcif/dmemWEN
 add wave -noupdate /system_tb/DUT/CPU/dcif/dmemload
 add wave -noupdate /system_tb/DUT/CPU/dcif/dmemstore
 add wave -noupdate /system_tb/DUT/CPU/dcif/dmemaddr
+add wave -noupdate /system_tb/DUT/CPU/CM/ICACHE/iaddr
+add wave -noupdate /system_tb/DUT/CPU/CM/ICACHE/state
+add wave -noupdate /system_tb/DUT/CPU/CM/ICACHE/dcif/ihit
 add wave -noupdate /system_tb/DUT/CPU/dcif/dhit
 add wave -noupdate /system_tb/DUT/CPU/CM/cif/dwait
 add wave -noupdate /system_tb/DUT/CPU/CM/cif/dREN
@@ -20,22 +23,34 @@ add wave -noupdate /system_tb/DUT/CPU/CM/cif/daddr
 add wave -noupdate /system_tb/DUT/CPU/CM/DCACHE/force_write1
 add wave -noupdate /system_tb/DUT/CPU/CM/DCACHE/force_write2
 add wave -noupdate /system_tb/DUT/CPU/CM/DCACHE/next_state
-add wave -noupdate -subitemconfig {{/system_tb/DUT/CPU/CM/DCACHE/block1[1]} -expand} /system_tb/DUT/CPU/CM/DCACHE/block1
-add wave -noupdate -subitemconfig {{/system_tb/DUT/CPU/CM/DCACHE/block2[1]} -expand} /system_tb/DUT/CPU/CM/DCACHE/block2
-add wave -noupdate /system_tb/DUT/CPU/CM/DCACHE/valid1
-add wave -noupdate /system_tb/DUT/CPU/CM/DCACHE/valid2
+add wave -noupdate -expand /system_tb/DUT/CPU/CM/DCACHE/block1
+add wave -noupdate -subitemconfig {{/system_tb/DUT/CPU/CM/DCACHE/block2[1]} -expand {/system_tb/DUT/CPU/CM/DCACHE/block2[0]} -expand} /system_tb/DUT/CPU/CM/DCACHE/block2
+add wave -noupdate -expand /system_tb/DUT/CPU/CM/DCACHE/valid1
+add wave -noupdate -expand /system_tb/DUT/CPU/CM/DCACHE/valid2
 add wave -noupdate /system_tb/DUT/CPU/CM/DCACHE/dirty1
 add wave -noupdate /system_tb/DUT/CPU/CM/DCACHE/dirty2
 add wave -noupdate /system_tb/DUT/CPU/CM/DCACHE/lru1
 add wave -noupdate /system_tb/DUT/CPU/CM/DCACHE/lru2
-add wave -noupdate /system_tb/DUT/CPU/CM/DCACHE/tag1
-add wave -noupdate /system_tb/DUT/CPU/CM/DCACHE/tag2
+add wave -noupdate -expand /system_tb/DUT/CPU/CM/DCACHE/tag1
+add wave -noupdate -expand /system_tb/DUT/CPU/CM/DCACHE/tag2
 add wave -noupdate /system_tb/DUT/CPU/CM/DCACHE/block1_flushed
 add wave -noupdate /system_tb/DUT/CPU/CM/DCACHE/block2_flushed
 add wave -noupdate /system_tb/DUT/CPU/CM/DCACHE/flush_index
-add wave -noupdate /system_tb/DUT/CPU/CM/DCACHE/next_data
+add wave -noupdate /system_tb/DUT/CPU/DP/aluif/ALUOP
+add wave -noupdate /system_tb/DUT/CPU/DP/aluif/portA
+add wave -noupdate /system_tb/DUT/CPU/DP/aluif/portB
+add wave -noupdate /system_tb/DUT/CPU/DP/aluif/portOut
+add wave -noupdate /system_tb/DUT/CPU/CM/DCACHE/hitcount
+add wave -noupdate /system_tb/DUT/CPU/CM/DCACHE/next_dirty
+add wave -noupdate /system_tb/DUT/CPU/CM/DCACHE/block1_flushed
+add wave -noupdate /system_tb/DUT/CPU/CM/DCACHE/block2_flushed
+add wave -noupdate /system_tb/DUT/CPU/CM/DCACHE/flush_index
+add wave -noupdate /system_tb/DUT/CPU/DP/PC
+add wave -noupdate /system_tb/DUT/RAM/ramif/ramaddr
+add wave -noupdate /system_tb/DUT/RAM/ramif/ramstore
+add wave -noupdate /system_tb/DUT/RAM/ramif/ramWEN
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {5095524 ps} 0}
+WaveRestoreCursors {{Cursor 1} {20843975 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 150
 configure wave -valuecolwidth 100
@@ -51,4 +66,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-WaveRestoreZoom {0 ps} {11680 ns}
+WaveRestoreZoom {19564 ns} {22484 ns}

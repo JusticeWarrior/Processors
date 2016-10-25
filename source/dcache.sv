@@ -40,6 +40,9 @@ module dcache (
 
 	logic block1_flushed, block2_flushed, next_block1_flushed, next_block2_flushed;
 	logic [2:0] flush_index, next_flush_index;
+	logic next_dirty;
+	logic ihit_wait;
+	logic next_ihit_wait;
 
 	dcachef_t daddr;
 	assign daddr = dcachef_t'(dcif.dmemaddr);
@@ -59,6 +62,7 @@ module dcache (
 			flush_index <= '0;
 			block1_flushed <= 0;
 			block2_flushed <= 0;
+			ihit_wait <= '0;
 			for (int i = 0; i < 8; i = i + 1) begin
 				block1[0][i] <= '0;
 				block1[1][i] <= '0;
@@ -88,6 +92,7 @@ module dcache (
 			block1[1][daddr.idx] <= next_data12;
 			block2[0][daddr.idx] <= next_data21;
 			block2[1][daddr.idx] <= next_data22;
+			ihit_wait <= next_ihit_wait;
 		end
 	end
 
@@ -95,13 +100,15 @@ module dcache (
 		next_flush_index = flush_index;
 		casez (state)
 			IDLE: begin
+				if (dcif.ihit)
+					next_ihit_wait = '0;
 				if (dcif.halt) begin
 					next_state = STORE1;
 				end
-				else if (dcif.dmemREN) begin
+				else if (dcif.dmemREN && !ihit_wait) begin
 					next_state = RHIT;
 				end
-				else if (dcif.dmemWEN) begin
+				else if (dcif.dmemWEN && !ihit_wait) begin
 					next_state = WHIT;
 				end
 				else begin
@@ -111,8 +118,12 @@ module dcache (
 			RHIT: begin
 				if (dcif.dhit) begin
 					next_state = IDLE;
+					next_ihit_wait = '1;
 				end
-				else if (!dcif.dhit) begin
+				else if (!dcif.dhit && ((lru1[daddr.idx] && dirty1[daddr.idx]) || (lru2[daddr.idx] && dirty2[daddr.idx]))) begin
+					next_state = STORE1;
+				end
+				else if (!dcif.dhit && ((lru1[daddr.idx] && !dirty1[daddr.idx]) || (lru2[daddr.idx] && !dirty2[daddr.idx]))) begin
 					next_state = LOAD1;
 				end
 				else begin
@@ -122,11 +133,12 @@ module dcache (
 			WHIT: begin
 				if (dcif.dhit) begin
 					next_state = IDLE;
+					next_ihit_wait = '1;
 				end
-				else if (!dcif.dhit && (dirty1[daddr.idx] || dirty2[daddr.idx])) begin
+				else if (!dcif.dhit && ((lru1[daddr.idx] && dirty1[daddr.idx]) || (lru2[daddr.idx] && dirty2[daddr.idx]))) begin
 					next_state = STORE1;
 				end
-				else if (!dcif.dhit && (!dirty1[daddr.idx] && !dirty2[daddr.idx])) begin
+				else if (!dcif.dhit && ((lru1[daddr.idx] && !dirty1[daddr.idx]) || (lru2[daddr.idx] && !dirty2[daddr.idx]))) begin
 					next_state = WCACHE;
 				end
 				else begin
@@ -137,6 +149,7 @@ module dcache (
 				if (!cif.dwait) begin
 					if (dcif.dmemWEN) begin
 						next_state = IDLE;
+						next_ihit_wait = '1;
 					end
 					else begin
 						next_state = LOAD2;
@@ -149,6 +162,7 @@ module dcache (
 			LOAD2: begin
 				if (!cif.dwait) begin
 					next_state = IDLE;
+					next_ihit_wait = '1;
 				end
 				else begin
 					next_state = LOAD2;
@@ -156,13 +170,11 @@ module dcache (
 			end
 			STORE1: begin//todo: FLUSHING
 				if (dcif.halt) begin
-					if (!cif.dwait) begin
-						if(block1_flushed && block2_flushed) begin
-							next_state = WCOUNT;
-						end
-						else begin
-							next_state = WAIT1;
-						end
+					if(block1_flushed && block2_flushed) begin
+						next_state = WCOUNT;
+					end
+					else if (!cif.dwait || next_dirty) begin
+						next_state = WAIT1;
 					end
 					else begin
 						next_state = STORE1;
@@ -182,7 +194,7 @@ module dcache (
 			end
 			STORE2: begin//todo: FLUSHING
 				if (dcif.halt) begin
-					if (!cif.dwait) begin
+					if (!cif.dwait || next_dirty) begin
 						next_state = WAIT2;
 						next_flush_index = flush_index + 1;
 					end
@@ -191,8 +203,11 @@ module dcache (
 					end
 				end
 				else begin
-					if (!cif.dwait) begin
+					if (!cif.dwait && dcif.dmemWEN) begin
 						next_state = WCACHE;
+					end
+					else if (!cif.dwait && dcif.dmemREN) begin
+						next_state = LOAD1;
 					end
 					else begin
 						next_state = STORE2;
@@ -241,6 +256,7 @@ module dcache (
 		next_data12 = block1[1][daddr.idx];
 		next_data21 = block2[0][daddr.idx];
 		next_data22 = block2[1][daddr.idx];
+		next_dirty = 0;
 		casez(state)
 			IDLE: begin
 				cif.dREN = 0;
@@ -267,6 +283,7 @@ module dcache (
 					if ((tag1[daddr.idx] == daddr.tag) && valid1[daddr.idx]) begin
 						next_lru1 = 0;
 						next_lru2 = 1;
+						next_dirty1 = 1;
 						if(!daddr.blkoff)
 							next_data11 = dcif.dmemstore;
 						else
@@ -275,6 +292,7 @@ module dcache (
 					else begin
 						next_lru1 = 1;
 						next_lru2 = 0;
+						next_dirty2 = 1;
 						if(!daddr.blkoff)
 							next_data21 = dcif.dmemstore;
 						else
@@ -349,32 +367,36 @@ module dcache (
 				end
 			end
 			STORE1:	begin//todo: FLUSHING
-				cif.dWEN = 1;
 				cif.dREN = 0;
 				if(dcif.halt) begin
 					if (!block1_flushed) begin
 						if(valid1[flush_index] && dirty1[flush_index]) begin
+							cif.dWEN = 1;
 							cif.dstore = block1[0][flush_index];
-							cif.daddr = {tag1[flush_index], flush_index, '0};
+							cif.daddr = {tag1[flush_index], flush_index, 1'b0, 2'b00};
 						end
+						else
+							next_dirty = '1;
 					end
 					else if (!block2_flushed) begin
 						if(valid2[flush_index] && dirty2[flush_index]) begin
-						next_lru1 = 1;
-						next_lru2 = 0;
+							cif.dWEN = 1;
 							cif.dstore = block2[0][flush_index];
-							cif.daddr = {tag2[flush_index], flush_index, '0};
+							cif.daddr = {tag2[flush_index], flush_index, 1'b0, 2'b00};
 						end
+						else
+							next_dirty = '1;
 					end
 				end
 				else begin
+					cif.dWEN = 1;
 					if(lru1[daddr.idx]) begin
 						cif.dstore = block1[0][daddr.idx];
-						cif.daddr = {tag1[daddr.idx], daddr.idx, '0};
+						cif.daddr = {tag1[daddr.idx], daddr.idx, 1'b0, 2'b00};
 					end
 					else begin
 						cif.dstore = block2[0][daddr.idx];
-						cif.daddr = {tag2[daddr.idx], daddr.idx, '0};
+						cif.daddr = {tag2[daddr.idx], daddr.idx, 1'b0, 2'b00};
 					end
 				end
 			end
@@ -382,36 +404,42 @@ module dcache (
 				cif.dWEN = 0;
 			end
 			STORE2: begin//todo: FLUSHING
-				cif.dWEN = 1;
 				cif.dREN = 0;
 				if(dcif.halt) begin
 					if (!block1_flushed) begin
 						if(valid1[flush_index] && dirty1[flush_index]) begin
+							cif.dWEN = 1;
 							cif.dstore = block1[1][flush_index];
-							cif.daddr = {tag1[flush_index], flush_index, '0};
+							cif.daddr = {tag1[flush_index], flush_index, 1'b1, 2'b00};
 						end
-						if (!cif.dwait && (flush_index == 7)) begin
+						else
+							next_dirty = '1;
+						if (flush_index == 7) begin
 							next_block1_flushed = 1;
 						end
 					end
 					else if (!block2_flushed) begin
 						if(valid2[flush_index] && dirty2[flush_index]) begin
+							cif.dWEN = 1;
 							cif.dstore = block2[1][flush_index];
-							cif.daddr = {tag2[flush_index], flush_index, '0};
+							cif.daddr = {tag2[flush_index], flush_index, 1'b1, 2'b00};
 						end
-						if (!cif.dwait && (flush_index == 7)) begin
+						else
+							next_dirty = '1;
+						if (flush_index == 7) begin
 							next_block2_flushed = 1;
 						end
 					end
 				end
 				else begin
+					cif.dWEN = 1;
 					if(lru1[daddr.idx]) begin
 						cif.dstore = block1[1][daddr.idx];
-						cif.daddr = {tag1[daddr.idx], daddr.idx, '0} + 32'h4;
+						cif.daddr = {tag1[daddr.idx], daddr.idx, 1'b1, 2'b00};
 					end
 					else begin
 						cif.dstore = block2[1][daddr.idx];
-						cif.daddr = {tag1[daddr.idx], daddr.idx, '0} + 32'h4;
+						cif.daddr = {tag2[daddr.idx], daddr.idx, 1'b1, 2'b00};
 					end
 				end
 			end
@@ -442,6 +470,10 @@ module dcache (
 				cif.dREN = 0;
 				cif.daddr = 32'h3100;
 				cif.dstore = hitcount;
+				if (!cif.dwait) begin
+					next_valid1 = '0;
+					next_valid2 = '0;
+				end
 			end
 			HALT: begin
 				cif.dWEN = 0;
