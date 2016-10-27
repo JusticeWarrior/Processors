@@ -414,7 +414,7 @@ module dcache (
 						end
 						else
 							next_dirty = '1;
-						if (flush_index == 7) begin
+						if (flush_index == 7 && next_state == WAIT2) begin
 							next_block1_flushed = 1;
 						end
 					end
@@ -426,7 +426,7 @@ module dcache (
 						end
 						else
 							next_dirty = '1;
-						if (flush_index == 7) begin
+						if (flush_index == 7 && next_state == WAIT2) begin
 							next_block2_flushed = 1;
 						end
 					end
