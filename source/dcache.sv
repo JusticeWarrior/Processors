@@ -97,6 +97,7 @@ module dcache (
 	end
 
 	always_comb begin
+		next_ihit_wait = ihit_wait;
 		next_flush_index = flush_index;
 		casez (state)
 			IDLE: begin
@@ -257,10 +258,21 @@ module dcache (
 		next_data21 = block2[0][daddr.idx];
 		next_data22 = block2[1][daddr.idx];
 		next_dirty = 0;
+		cif.dREN = 0;
+		cif.dWEN = 0;
+		dcif.dmemload = cif.dload;
+		cif.daddr = '0;
+		cif.dstore = '0;
 		casez(state)
 			IDLE: begin
 				cif.dREN = 0;
 				cif.dWEN = 0;
+					if (tag1[daddr.idx] == daddr.tag) begin
+						dcif.dmemload = block1[daddr.blkoff][daddr.idx];
+					end
+					else begin
+						dcif.dmemload = block2[daddr.blkoff][daddr.idx];
+					end
 			end
 			RHIT: begin
 				if(dcif.dhit) begin
