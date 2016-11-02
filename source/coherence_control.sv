@@ -5,9 +5,9 @@
 `include "cpu_types_pkg.vh"
 
 module coherence_control (
-	CLK, nRST,
-	cache_control_if.cc ccif,
-	c2c
+	input CLK, nRST,
+	output logic c2c, 
+	cache_control_if.cc ccif
 );
 
 	// type import
@@ -35,29 +35,29 @@ module coherence_control (
 					end
 
 					READ1 : begin
-							if ( (!dwait[0] || (ccif.cctrans[1] && ccif.ccwrite[1])) || (!dwait[1] || (ccif.cctrans[0] && ccif.ccwrite[0])) )
+							if ( (!ccif.dwait[0] || (ccif.cctrans[1] && ccif.ccwrite[1])) || (!ccif.dwait[1] || (ccif.cctrans[0] && ccif.ccwrite[0])) )
 									nextState = READ2;
 					end
 
 					READ2 : begin
-							if ( (!dwait[0] || (ccif.cctrans[1] && ccif.ccwrite[1])) || (!dwait[1] || (ccif.cctrans[0] && ccif.ccwrite[0])) )
+							if ( (!ccif.dwait[0] || (ccif.cctrans[1] && ccif.ccwrite[1])) || (!ccif.dwait[1] || (ccif.cctrans[0] && ccif.ccwrite[0])) )
 									nextState = WAIT;
 					end
 
 					WRITE1 : begin
-							if ( !dwait[0] || !dwait[1] )
+							if ( !ccif.dwait[0] || !ccif.dwait[1] )
 									nextState = WRITE2;
 					end
 
 					WRITE2 : begin
-							if ( !dwait[0] || !dwait[1] )
+							if ( !ccif.dwait[0] || !ccif.dwait[1] )
 									nextState = WAIT;
 					end
 
 			endcase
 	end
 
-	always_ff @(posedge clk, negedge nRST) begin
+	always_ff @(posedge CLK, negedge nRST) begin
 			if (nRST == 0)
 					state <= WAIT;
 			else
@@ -85,7 +85,7 @@ module coherence_control (
 							if (ccif.ccwrite[1]) begin
 								c2c = 1;
 								ccif.dload[0] = ccif.dstore[1];
-								ccif.dwait[0] = 0;
+								//ccif.dwait[0] = 0;
 							end
 						end else begin
 							ccif.ccwait[0] = 1;
@@ -94,7 +94,7 @@ module coherence_control (
 							if (ccif.ccwrite[0]) begin
 								c2c = 1;
 								ccif.dload[1] = ccif.dstore[0];
-								ccif.dwait[1] = 0;
+								//ccif.dwait[1] = 0;
 							end
 						end
 					end
@@ -113,11 +113,11 @@ module coherence_control (
 						if (ccif.cctrans[0]) begin
 							ccif.ccwait[1] = 1;
 							ccif.ccsnoopaddr[1] = ccif.daddr[0];
-							ccif.inv[1] = 1;
+							ccif.ccinv[1] = 1;
 						end else begin
 							ccif.ccwait[0] = 1;
 							ccif.ccsnoopaddr[0] = ccif.daddr[1];
-							ccif.inv[0] = 1;
+							ccif.ccinv[0] = 1;
 						end
 					end
 
@@ -125,11 +125,11 @@ module coherence_control (
 						if (ccif.cctrans[0]) begin
 							ccif.ccwait[1] = 1;
 							ccif.ccsnoopaddr[1] = ccif.daddr[0];
-							ccif.inv[1] = 1;
+							ccif.ccinv[1] = 1;
 						end else begin
 							ccif.ccwait[0] = 1;
 							ccif.ccsnoopaddr[0] = ccif.daddr[1];
-							ccif.inv[0] = 1;
+							ccif.ccinv[0] = 1;
 						end
 					end
 
