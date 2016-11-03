@@ -22,6 +22,10 @@ module memory_control (
 	// number of cpus for cc
 	parameter CPUS = 2;
 
+	logic c2c;
+
+	coherence_control coco (CLK, nRST, ccif, c2c);
+
 	always_comb begin
 		ccif.ramstore = '0;
 		ccif.ramWEN = '0;

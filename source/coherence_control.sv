@@ -6,7 +6,7 @@
 
 module coherence_control (
 	input CLK, nRST,
-	output logic c2c, 
+	output logic c2c,
 	cache_control_if.cc ccif
 );
 
@@ -103,9 +103,21 @@ module coherence_control (
 						if (ccif.cctrans[0]) begin
 							ccif.ccwait[1] = 1;
 							ccif.ccsnoopaddr[1] = ccif.daddr[0];
+
+							if (ccif.ccwrite[1]) begin
+								c2c = 1;
+								ccif.dload[0] = ccif.dstore[1];
+								//ccif.dwait[0] = 0;
+							end
 						end else begin
 							ccif.ccwait[0] = 1;
 							ccif.ccsnoopaddr[0] = ccif.daddr[1];
+
+							if (ccif.ccwrite[0]) begin
+								c2c = 1;
+								ccif.dload[1] = ccif.dstore[0];
+								//ccif.dwait[1] = 0;
+							end
 						end
 					end
 
