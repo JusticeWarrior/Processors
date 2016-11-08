@@ -45,15 +45,13 @@ module coherence_control (
 					end
 
 					WRITE1 : begin
-							if ((ccif.cctrans[0] && !ccif.dWEN[0]) || (ccif.cctrans[1] && !ccif.dWEN[1]))
+							if (!ccif.cctrans[0])
 								nextState = WAIT;
-							else if ( !ccif.dwait[0] || !ccif.dwait[1] )
-									nextState = WRITE2;
 					end
 
 					WRITE2 : begin
-							if ( !ccif.dwait[0] || !ccif.dwait[1] )
-									nextState = WAIT;
+							if ( (!ccif.dwait[0] && ccif.dREN[0]) || (!ccif.dwait[1] && ccif.dREN[1]) )
+								nextState = WAIT;
 					end
 
 			endcase

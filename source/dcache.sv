@@ -12,7 +12,7 @@ module dcache (
 );
 	import cpu_types_pkg::*;
 
-	typedef enum bit [4:0] {IDLE, RHIT, WHIT, LOAD1, LOAD2, STORE1, STORE2, WCACHE, WCOUNT, HALT, WAIT1, WAIT2} state_t;
+	typedef enum bit [4:0] {IDLE, RHIT, WHIT, LOAD1, LOAD2, STORE1, STORE2, WCACHE, WCOUNT, HALT, WAIT1, WAIT2, INV} state_t;
 	state_t state, next_state;
 
 	word_t [7:0] block1[1:0];
@@ -48,6 +48,9 @@ module dcache (
 	assign daddr = dcachef_t'(dcif.dmemaddr);
 
 	assign dcif.dhit = (((tag1[daddr.idx] == daddr.tag) && valid1[daddr.idx]) || ((tag2[daddr.idx] == daddr.tag) && valid2[daddr.idx]));
+
+	assign cif.cctrans = (state != IDLE && !(state == RHIT && dcif.dhit));
+	assign cif.ccwrite = (state != IDLE && dcif.dmemWEN);
 
 	always_ff @ (posedge CLK, negedge nRST) begin
 		if (nRST == 0) begin
@@ -133,7 +136,7 @@ module dcache (
 			end
 			WHIT: begin
 				if (dcif.dhit) begin
-					next_state = IDLE;
+					next_state = INV;
 					next_ihit_wait = '1;
 				end
 				else if (!dcif.dhit && ((lru1[daddr.idx] && dirty1[daddr.idx]) || (lru2[daddr.idx] && dirty2[daddr.idx]))) begin
@@ -145,6 +148,9 @@ module dcache (
 				else begin
 					next_state = WHIT;
 				end
+			end
+			INV: begin
+				next_state = IDLE;
 			end
 			LOAD1: begin
 				if (!cif.dwait) begin
@@ -265,6 +271,16 @@ module dcache (
 		cif.dstore = '0;
 		casez(state)
 			IDLE: begin
+				cif.dREN = 0;
+				cif.dWEN = 0;
+					if (tag1[daddr.idx] == daddr.tag) begin
+						dcif.dmemload = block1[daddr.blkoff][daddr.idx];
+					end
+					else begin
+						dcif.dmemload = block2[daddr.blkoff][daddr.idx];
+					end
+			end
+			INV: begin
 				cif.dREN = 0;
 				cif.dWEN = 0;
 					if (tag1[daddr.idx] == daddr.tag) begin

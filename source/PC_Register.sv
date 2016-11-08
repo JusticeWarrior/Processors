@@ -13,13 +13,13 @@ module PC_Register (
 	output logic [31:0] PC
 );
 	// pc init
-	parameter PC_INIT = 0;
+	parameter PC_IN = 0;
 	// import types
 	import cpu_types_pkg::*;
 
 	always_ff @(posedge CLK, negedge nRST) begin
 		if (nRST == '0)
-			PC <= PC_INIT;
+			PC <= PC_IN;
 		else if (Adv && !Halt)
 			PC <= next_PC;
 	end
