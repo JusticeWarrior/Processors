@@ -35,17 +35,19 @@ module coherence_control (
 					end
 
 					READ1 : begin
-							if ( (!ccif.dwait[0] || (ccif.cctrans[1] && ccif.ccwrite[1])) || (!ccif.dwait[1] || (ccif.cctrans[0] && ccif.ccwrite[0])) )
+							if ( (!ccif.dwait[0] || (ccif.cctrans[1] && ccif.ccwrite[1] && !ccif.dwait[1])) || (!ccif.dwait[1] || (ccif.cctrans[0] && ccif.ccwrite[0] && !ccif.dwait[0])) )
 									nextState = READ2;
 					end
 
 					READ2 : begin
-							if ( (!ccif.dwait[0] || (ccif.cctrans[1] && ccif.ccwrite[1])) || (!ccif.dwait[1] || (ccif.cctrans[0] && ccif.ccwrite[0])) )
+							if ( (!ccif.dwait[0] || (ccif.cctrans[1] && ccif.ccwrite[1] && !ccif.dwait[1])) || (!ccif.dwait[1] || (ccif.cctrans[0] && ccif.ccwrite[0] && !ccif.dwait[0])) )
 									nextState = WAIT;
 					end
 
 					WRITE1 : begin
-							if ( !ccif.dwait[0] || !ccif.dwait[1] )
+							if ((ccif.cctrans[0] && !ccif.dWEN[0]) || (ccif.cctrans[1] && !ccif.dWEN[1]))
+								nextState = WAIT;
+							else if ( !ccif.dwait[0] || !ccif.dwait[1] )
 									nextState = WRITE2;
 					end
 
