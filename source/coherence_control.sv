@@ -4,14 +4,15 @@
 // memory types
 `include "cpu_types_pkg.vh"
 
+// type import
+import cpu_types_pkg::*;
+
 module coherence_control (
 	input CLK, nRST,
 	output logic c2c,
+	output word_t cocodload [1:0],
 	cache_control_if.cc ccif
 );
-
-	// type import
-	import cpu_types_pkg::*;
 
 	typedef enum bit [2:0] {
 			WAIT,
@@ -72,6 +73,8 @@ module coherence_control (
 			ccif.ccsnoopaddr[0] = '0;
 			ccif.ccsnoopaddr[1] = '0;
 			c2c = 0;
+			cocodload[0] = ccif.dstore[0];
+			cocodload[1] = ccif.dstore[1];
 
 			case(state)
 					WAIT: begin
@@ -88,7 +91,7 @@ module coherence_control (
 
 							if (ccif.ccwrite[1]) begin
 								c2c = 1;
-								ccif.dload[0] = ccif.dstore[1];
+								cocodload[0] = ccif.dstore[1];
 								//ccif.dwait[0] = 0;
 							end
 						end else begin
@@ -97,7 +100,7 @@ module coherence_control (
 
 							if (ccif.ccwrite[0]) begin
 								c2c = 1;
-								ccif.dload[1] = ccif.dstore[0];
+								cocodload[1] = ccif.dstore[0];
 								//ccif.dwait[1] = 0;
 							end
 						end
@@ -110,7 +113,7 @@ module coherence_control (
 
 							if (ccif.ccwrite[1]) begin
 								c2c = 1;
-								ccif.dload[0] = ccif.dstore[1];
+								cocodload[0] = ccif.dstore[1];
 								//ccif.dwait[0] = 0;
 							end
 						end else begin
@@ -119,7 +122,7 @@ module coherence_control (
 
 							if (ccif.ccwrite[0]) begin
 								c2c = 1;
-								ccif.dload[1] = ccif.dstore[0];
+								cocodload[1] = ccif.dstore[0];
 								//ccif.dwait[1] = 0;
 							end
 						end

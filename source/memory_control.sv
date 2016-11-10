@@ -23,8 +23,13 @@ module memory_control (
 	parameter CPUS = 2;
 
 	logic c2c;
+	word_t cocodload[1:0];
+	word_t memdload[1:0];
 
-	coherence_control coco (CLK, nRST, ccif, c2c);
+	coherence_control coco (CLK, nRST, c2c, cocodload, ccif);
+
+	assign ccif.dload[0] = c2c ? cocodload[0] : memdload[0];
+	assign ccif.dload[1] = c2c ? cocodload[1] : memdload[1];
 
 	always_comb begin
 		ccif.ramstore = '0;
@@ -35,9 +40,9 @@ module memory_control (
 		ccif.iwait = '1;
 		ccif.dwait = '1;
 		ccif.iload[0] = ccif.ramload;
-		ccif.dload[0] = ccif.ramload;
+		memdload[0] = ccif.ramload;
 		ccif.iload[1] = ccif.ramload;
-		ccif.dload[1] = ccif.ramload;
+		memdload[1] = ccif.ramload;
 
 		if (ccif.dWEN[0]) begin
 			ccif.ramWEN = 1'b1;
@@ -45,6 +50,7 @@ module memory_control (
 			ccif.ramstore = ccif.dstore[0];
 			if (ccif.ramstate == ACCESS) begin
 				ccif.dwait[0] = '0;
+				ccif.dwait[1] = c2c ? ccif.dwait[0] : ccif.dwait[1];
 			end
 		end
 		else if (ccif.dWEN[1]) begin
@@ -53,6 +59,7 @@ module memory_control (
 			ccif.ramstore = ccif.dstore[1];
 			if (ccif.ramstate == ACCESS) begin
 				ccif.dwait[1] = '0;
+				ccif.dwait[0] = c2c ? ccif.dwait[1] : ccif.dwait[0];
 			end
 		end
 		else if (ccif.dREN[0]) begin
