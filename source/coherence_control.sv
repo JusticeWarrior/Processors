@@ -75,6 +75,10 @@ module coherence_control (
 
 			case(state)
 					WAIT: begin
+						if (ccif.cctrans[0])
+							ccif.ccwait[1] = 1;
+						else if (ccif.cctrans[1])
+							ccif.ccwait[0] = 1;
 					end
 
 					READ1: begin

@@ -56,17 +56,21 @@ module memory_control (
 			end
 		end
 		else if (ccif.dREN[0]) begin
-			ccif.ramREN = 1'b1;
-			ccif.ramaddr = ccif.daddr[0];
-			if (ccif.ramstate == ACCESS) begin
-				ccif.dwait[0] = '0;
+			if (!c2c) begin
+				ccif.ramREN = 1'b1;
+				ccif.ramaddr = ccif.daddr[0];
+				if (ccif.ramstate == ACCESS) begin
+					ccif.dwait[0] = '0;
+				end
 			end
 		end
 		else if (ccif.dREN[1]) begin
-			ccif.ramREN = 1'b1;
-			ccif.ramaddr = ccif.daddr[1];
-			if (ccif.ramstate == ACCESS) begin
-				ccif.dwait[1] = '0;
+			if (!c2c) begin
+				ccif.ramREN = 1'b1;
+				ccif.ramaddr = ccif.daddr[1];
+				if (ccif.ramstate == ACCESS) begin
+					ccif.dwait[1] = '0;
+				end
 			end
 		end
 		else if (ccif.iREN[0]) begin

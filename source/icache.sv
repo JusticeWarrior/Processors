@@ -31,7 +31,7 @@ module icache (
 	icachef_t iaddr;
 	assign iaddr = dcif.imemaddr;
 
-	assign dcif.ihit = valid[iaddr.idx] && dcif.imemREN && (tag[iaddr.idx] == iaddr.tag) && !(dcif.dmemREN || dcif.dmemWEN) && (state != CHECK);
+	assign dcif.ihit = valid[iaddr.idx] && dcif.imemREN && (tag[iaddr.idx] == iaddr.tag) && !(dcif.dmemREN || dcif.dmemWEN || cif.ccwait) && (state != CHECK);
 	assign dcif.imemload = data[iaddr.idx];
 
 	assign cif.iREN = dcif.imemREN && !dcif.ihit;

@@ -12,7 +12,7 @@ module dcache (
 );
 	import cpu_types_pkg::*;
 
-	typedef enum bit [4:0] {IDLE, RHIT, WHIT, LOAD1, LOAD2, STORE1, STORE2, WCACHE, WCOUNT, HALT, WAIT1, WAIT2, INV} state_t;
+	typedef enum bit [4:0] {IDLE, RHIT, WHIT, LOAD1, LOAD2, STORE1, STORE2, WCACHE, WCOUNT, HALT, WAIT1, WAIT2, INV, SSTORE} state_t;
 	state_t state, next_state;
 
 	word_t [7:0] block1[1:0];
@@ -44,13 +44,20 @@ module dcache (
 	logic ihit_wait;
 	logic next_ihit_wait;
 
+	logic shit;
+
+	dcachef_t sdaddr;
+
 	dcachef_t daddr;
 	assign daddr = dcachef_t'(dcif.dmemaddr);
 
-	assign dcif.dhit = (((tag1[daddr.idx] == daddr.tag) && valid1[daddr.idx]) || ((tag2[daddr.idx] == daddr.tag) && valid2[daddr.idx]));
+	assign sdaddr = dcachef_t'(cif.ccsnoopaddr);
+	assign shit = (cif.ccwait && (((tag1[sdaddr.idx] == sdaddr.tag) && valid1[sdaddr.idx]) || ((tag2[sdaddr.idx] == sdaddr.tag) && valid2[sdaddr.idx])));
 
-	assign cif.cctrans = (state != IDLE && !(state == RHIT && dcif.dhit));
-	assign cif.ccwrite = (state != IDLE && dcif.dmemWEN);
+	assign dcif.dhit = (((tag1[daddr.idx] == daddr.tag) && valid1[daddr.idx]) || ((tag2[daddr.idx] == daddr.tag) && valid2[daddr.idx])) && !cif.ccwait;
+
+	assign cif.cctrans = (state != IDLE && !(state == RHIT && dcif.dhit)) || shit;
+	assign cif.ccwrite = (state != IDLE && dcif.dmemWEN) || shit;
 
 	always_ff @ (posedge CLK, negedge nRST) begin
 		if (nRST == 0) begin
@@ -109,6 +116,9 @@ module dcache (
 				if (dcif.halt) begin
 					next_state = STORE1;
 				end
+				else if (shit) begin
+					next_state = SSTORE;
+				end
 				else if (dcif.dmemREN && !ihit_wait) begin
 					next_state = RHIT;
 				end
@@ -120,7 +130,10 @@ module dcache (
 				end
 			end
 			RHIT: begin
-				if (dcif.dhit) begin
+				if (cif.ccwait) begin
+					next_state = IDLE;
+				end
+				else if (dcif.dhit) begin
 					next_state = IDLE;
 					next_ihit_wait = '1;
 				end
@@ -135,7 +148,10 @@ module dcache (
 				end
 			end
 			WHIT: begin
-				if (dcif.dhit) begin
+				if (cif.ccwait) begin
+					next_state = IDLE;
+				end
+				else if (dcif.dhit) begin
 					next_state = INV;
 					next_ihit_wait = '1;
 				end
@@ -194,6 +210,14 @@ module dcache (
 					else begin
 						next_state = STORE1;
 					end
+				end
+			end
+			SSTORE: begin
+				if (!cif.dwait) begin
+					next_state = IDLE;
+				end
+				else begin
+					next_state = SSTORE;
 				end
 			end
 			WAIT1: begin//todo: FLUSHING
@@ -426,6 +450,16 @@ module dcache (
 						cif.dstore = block2[0][daddr.idx];
 						cif.daddr = {tag2[daddr.idx], daddr.idx, 1'b0, 2'b00};
 					end
+				end
+			end
+			SSTORE: begin
+				cif.dWEN = 1;
+				cif.daddr = cif.ccsnoopaddr;
+				if((tag1[sdaddr.idx] == sdaddr.tag) && valid1[sdaddr.idx]) begin
+					cif.dstore = block1[0][sdaddr.idx];
+				end
+				else begin
+					cif.dstore = block2[0][sdaddr.idx];
 				end
 			end
 			WAIT1: begin
