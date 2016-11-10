@@ -52,7 +52,8 @@ module dcache (
 	assign daddr = dcachef_t'(dcif.dmemaddr);
 
 	assign sdaddr = dcachef_t'(cif.ccsnoopaddr);
-	assign shit = (cif.ccwait && (((tag1[sdaddr.idx] == sdaddr.tag) && valid1[sdaddr.idx]) || ((tag2[sdaddr.idx] == sdaddr.tag) && valid2[sdaddr.idx])));
+	assign shit = cif.ccwait && (((tag1[sdaddr.idx] == sdaddr.tag) && valid1[sdaddr.idx]) || ((tag2[sdaddr.idx] == sdaddr.tag) && valid2[sdaddr.idx])) && !cif.ccinv;
+	assign inv = cif.ccwait && (((tag1[sdaddr.idx] == sdaddr.tag) && valid1[sdaddr.idx]) || ((tag2[sdaddr.idx] == sdaddr.tag) && valid2[sdaddr.idx])) && cif.ccinv;
 
 	assign dcif.dhit = (((tag1[daddr.idx] == daddr.tag) && valid1[daddr.idx]) || ((tag2[daddr.idx] == daddr.tag) && valid2[daddr.idx])) && !cif.ccwait;
 
@@ -88,10 +89,22 @@ module dcache (
 			state <= next_state;
 			tag1[daddr.idx] <= next_tag1;
 			tag2[daddr.idx] <= next_tag2;
-			valid1[daddr.idx] <= next_valid1;
-			valid2[daddr.idx] <= next_valid2;
-			dirty1[daddr.idx] <= next_dirty1;
-			dirty2[daddr.idx] <= next_dirty2;
+			if (inv) begin
+				valid1[sdaddr.idx] <= next_valid1;
+				valid2[sdaddr.idx] <= next_valid2;
+			end
+			else begin
+				valid1[daddr.idx] <= next_valid1;
+				valid2[daddr.idx] <= next_valid2;
+			end
+			if (shit) begin
+				dirty1[sdaddr.idx] <= next_dirty1;
+				dirty2[sdaddr.idx] <= next_dirty2;
+			end
+			else begin
+				dirty1[daddr.idx] <= next_dirty1;
+				dirty2[daddr.idx] <= next_dirty2;
+			end
 			lru1[daddr.idx] <= next_lru1;
 			lru2[daddr.idx] <= next_lru2;
 			hitcount <= next_hitcount;
@@ -118,6 +131,9 @@ module dcache (
 				end
 				else if (shit) begin
 					next_state = SSTORE;
+				end
+				else if (cif.ccwait) begin
+					next_state = IDLE;
 				end
 				else if (dcif.dmemREN && !ihit_wait) begin
 					next_state = RHIT;
@@ -297,22 +313,30 @@ module dcache (
 			IDLE: begin
 				cif.dREN = 0;
 				cif.dWEN = 0;
-					if (tag1[daddr.idx] == daddr.tag) begin
-						dcif.dmemload = block1[daddr.blkoff][daddr.idx];
+				if (inv) begin
+					if((tag1[sdaddr.idx] == sdaddr.tag) && valid1[sdaddr.idx]) begin
+						next_valid1 = 0;
 					end
 					else begin
-						dcif.dmemload = block2[daddr.blkoff][daddr.idx];
+						next_valid2 = 0;
 					end
+				end
+				if (tag1[daddr.idx] == daddr.tag) begin
+					dcif.dmemload = block1[daddr.blkoff][daddr.idx];
+				end
+				else begin
+					dcif.dmemload = block2[daddr.blkoff][daddr.idx];
+				end
 			end
 			INV: begin
 				cif.dREN = 0;
 				cif.dWEN = 0;
-					if (tag1[daddr.idx] == daddr.tag) begin
-						dcif.dmemload = block1[daddr.blkoff][daddr.idx];
-					end
-					else begin
-						dcif.dmemload = block2[daddr.blkoff][daddr.idx];
-					end
+				if (tag1[daddr.idx] == daddr.tag) begin
+					dcif.dmemload = block1[daddr.blkoff][daddr.idx];
+				end
+				else begin
+					dcif.dmemload = block2[daddr.blkoff][daddr.idx];
+				end
 			end
 			RHIT: begin
 				if(dcif.dhit) begin
@@ -326,6 +350,14 @@ module dcache (
 						dcif.dmemload = block2[daddr.blkoff][daddr.idx];
 						next_lru1 = 1;
 						next_lru2 = 0;
+					end
+				end
+				if (inv) begin
+					if((tag1[sdaddr.idx] == sdaddr.tag) && valid1[sdaddr.idx]) begin
+						next_valid1 = 0;
+					end
+					else begin
+						next_valid2 = 0;
 					end
 				end
 			end
@@ -349,6 +381,14 @@ module dcache (
 							next_data21 = dcif.dmemstore;
 						else
 							next_data22 = dcif.dmemstore;
+					end
+				end
+				if (inv) begin
+					if((tag1[sdaddr.idx] == sdaddr.tag) && valid1[sdaddr.idx]) begin
+						next_valid1 = 0;
+					end
+					else begin
+						next_valid2 = 0;
 					end
 				end
 			end
@@ -457,9 +497,11 @@ module dcache (
 				cif.daddr = cif.ccsnoopaddr;
 				if((tag1[sdaddr.idx] == sdaddr.tag) && valid1[sdaddr.idx]) begin
 					cif.dstore = block1[0][sdaddr.idx];
+					next_dirty1 = 0;
 				end
 				else begin
 					cif.dstore = block2[0][sdaddr.idx];
+					next_dirty2 = 0;
 				end
 			end
 			WAIT1: begin
