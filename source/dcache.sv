@@ -49,8 +49,13 @@ module dcache (
 	word_t next_link_reg;
 	logic next_link_valid;
 	logic link_fail;
+	logic last_read;
+	logic next_last_read;
 
 	logic shit;
+
+	logic link_out;
+	logic next_link_out;
 
 	dcachef_t sdaddr;
 
@@ -63,7 +68,7 @@ module dcache (
 
 	assign link_fail = (state == WHIT && dcif.datomic && (dcif.dmemaddr != link_reg || !link_valid) && !cif.ccwait);
 
-	assign link_success = ((state == WHIT || ((state == LOAD1 || state == LOAD2) && dcif.dmemWEN)) && dcif.datomic && (dcif.dmemaddr == link_reg && link_valid) && !cif.ccwait);
+	assign link_success = ((state == WHIT || state == INV || ((state == LOAD1 || state == LOAD2) && dcif.dmemWEN)) && (dcif.dmemaddr == link_reg && link_valid) && !cif.ccwait);
 
 	assign dcif.dhit = ((((tag1[daddr.idx] == daddr.tag) && valid1[daddr.idx]) || ((tag2[daddr.idx] == daddr.tag) && valid2[daddr.idx])) && !cif.ccwait) || link_fail;
 
@@ -86,6 +91,8 @@ module dcache (
 			ihit_wait <= '0;
 			link_reg <= '0;
 			link_valid <= 0;
+			link_out <= 0;
+			last_read <= 0;
 			for (int i = 0; i < 8; i = i + 1) begin
 				block1[0][i] <= '0;
 				block1[1][i] <= '0;
@@ -130,6 +137,8 @@ module dcache (
 			ihit_wait <= next_ihit_wait;
 			link_reg <= next_link_reg;
 			link_valid <= next_link_valid;
+			link_out <= next_link_out;
+			last_read <= next_last_read;
 		end
 	end
 
@@ -183,7 +192,7 @@ module dcache (
 				end
 				else if (dcif.dhit) begin
 					if (link_fail) begin
-						next_state = WAIT;
+						next_state = IDLE;
 						next_ihit_wait = '1;
 					end else begin
 						next_state = INV;
@@ -333,6 +342,8 @@ module dcache (
 		cif.dstore = '0;
 		next_link_reg = link_reg;
 		next_link_valid = link_valid;
+		next_link_out = link_out;
+		next_last_read = last_read;
 		casez(state)
 			IDLE: begin
 				cif.dREN = 0;
@@ -354,6 +365,9 @@ module dcache (
 				else begin
 					dcif.dmemload = block2[daddr.blkoff][daddr.idx];
 				end
+				if (dcif.datomic && !last_read) begin
+					dcif.dmemload = {31'b0, link_out};
+				end
 			end
 			INV: begin
 				cif.dREN = 0;
@@ -364,8 +378,16 @@ module dcache (
 				else begin
 					dcif.dmemload = block2[daddr.blkoff][daddr.idx];
 				end
+				if (link_success) begin
+					if (dcif.datomic) begin
+						dcif.dmemload = 1;
+						next_link_out = 1;
+					end
+					next_link_valid = 0;
+				end
 			end
 			RHIT: begin
+				next_last_read = 1;
 				if (dcif.datomic) begin
 					next_link_reg = dcif.dmemaddr;
 					next_link_valid = 1;
@@ -396,13 +418,18 @@ module dcache (
 				end
 			end
 			WHIT: begin
+				next_last_read = 0;
 				if(dcif.dhit) begin
 					if (link_fail) begin
 						dcif.dmemload = '0;
+						next_link_out = 0;
 					end
 					else begin
 						if (link_success) begin
-							dcif.dmemload = 1;
+							if (dcif.datomic) begin
+								dcif.dmemload = 1;
+								next_link_out = 1;
+							end
 						end
 						next_hitcount = hitcount + 1;
 						if ((tag1[daddr.idx] == daddr.tag) && valid1[daddr.idx]) begin
@@ -474,7 +501,11 @@ module dcache (
 					end
 				end
 				if (link_success) begin
-					dcif.dmemload = 1;
+					if (dcif.datomic) begin
+						dcif.dmemload = 1;
+						next_link_out = 1;
+					end
+					next_link_valid = 0;
 				end
 			end
 			LOAD2: begin
@@ -506,7 +537,11 @@ module dcache (
 					end
 				end
 				if (link_success) begin
-					dcif.dmemload = 1;
+					if (dcif.datomic) begin
+						dcif.dmemload = 1;
+						next_link_out = 1;
+					end
+					next_link_valid = 0;
 				end
 			end
 			STORE1:	begin//todo: FLUSHING

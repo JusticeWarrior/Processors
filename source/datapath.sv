@@ -137,6 +137,12 @@ module datapath (
 				forward_datB = dlif.out_rdat2;
 			end
 		endcase
+
+		/*if (elif.wsel == mlif.out_wsel && mlif.out_regWEN && mlif.out_datomic) begin
+			elif.rdat2 = mlif.out_dload;
+		end else begin
+			elif.rdat2 = forward_datB;
+		end*/
 	end
 	assign aluif.portB = dlif.out_ALUSrc ? dlif.out_extout : forward_datB;
 
@@ -144,8 +150,8 @@ module datapath (
 	assign elif.pc_plus_4 = dlif.out_pc_plus_4;
 	assign elif.baddr = (dlif.out_pc_plus_4 + (dlif.out_extout << 2));
 	assign elif.zero = aluif.zero;
-	assign elif.portout = aluif.portOut;
 	assign elif.rdat2 = forward_datB;
+	assign elif.portout = aluif.portOut;
 	assign elif.Branch = dlif.out_Branch;
 	assign elif.bne = dlif.out_bne;
 	assign elif.regWEN = dlif.out_regWEN;
@@ -176,6 +182,7 @@ module datapath (
 	assign mlif.flush = 0;
 	assign mlif.en = en;
 	assign mlif.dhit = dpif.dhit;
+	assign mlif.datomic = elif.out_datomic;
 
 	// forwarding unit
 	assign fuif.regWEN_ex = elif.out_regWEN;
@@ -205,13 +212,23 @@ module datapath (
 			rfif.wdat = mlif.out_portout;
 	end
 
+	/*always_comb begin
+		if (elif.out_wsel == mlif.out_wsel && mlif.out_regWEN && mlif.out_datomic) begin
+			dpif.dmemstore = mlif.out_dload;
+		end else begin
+			dpif.dmemstore = elif.out_rdat2;
+		end
+	end*/
+
+
+	assign dpif.dmemstore = elif.out_rdat2;
+
 	// datapath
 	assign dpif.halt = mlif.out_halt;
 	assign dpif.imemREN = ~mlif.out_halt;
 	assign dpif.imemaddr = PC;
 	assign dpif.dmemREN = elif.out_dREN & !mlif.out_halt;
 	assign dpif.dmemWEN = elif.out_dWEN & !mlif.out_halt;
-	assign dpif.dmemstore = elif.out_rdat2;
 	assign dpif.dmemaddr = elif.out_portout;
 	assign dpif.datomic = elif.out_datomic;
 

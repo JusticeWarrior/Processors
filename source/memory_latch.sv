@@ -23,6 +23,7 @@ module memory_latch (
 			mlif.out_jaddr <= 0;
 			mlif.out_dload <= 0;
 			internal_dload <= '0;
+			mlif.out_datomic <= 0;
 		end
 		else begin
 			if (mlif.dhit)
@@ -41,6 +42,7 @@ module memory_latch (
 				mlif.out_wsel <= 0;
 				mlif.out_jaddr <= 0;
 				mlif.out_dload <= 0;
+				mlif.out_datomic <= 0;
 				// internal_dload is not flushed here!!!!
 			end
 			else if(mlif.en) begin
@@ -55,6 +57,7 @@ module memory_latch (
 				mlif.out_jaddr <= mlif.jaddr;
 				//mlif.out_dload <= mlif.dload;
 				mlif.out_dload <= internal_dload;
+				mlif.out_datomic <= mlif.datomic;
 			end
 			else begin
 				mlif.out_pc_plus_4 <= mlif.out_pc_plus_4;
@@ -67,6 +70,7 @@ module memory_latch (
 				mlif.out_wsel <= mlif.out_wsel;
 				mlif.out_jaddr <= mlif.out_jaddr;
 				mlif.out_dload <= mlif.out_dload;
+				mlif.out_datomic <= mlif.out_datomic;
 			end
 		end
 	end
