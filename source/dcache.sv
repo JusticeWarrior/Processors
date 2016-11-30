@@ -51,9 +51,9 @@ module dcache (
 	logic link_fail;
 	logic last_read;
 	logic next_last_read;
-
+	logic inv;
 	logic shit;
-
+	logic link_success;
 	logic link_out;
 	logic next_link_out;
 
@@ -108,7 +108,7 @@ module dcache (
 			state <= next_state;
 			tag1[daddr.idx] <= next_tag1;
 			tag2[daddr.idx] <= next_tag2;
-			if (inv) begin
+			if (cif.ccinv) begin
 				valid1[sdaddr.idx] <= next_valid1;
 				valid2[sdaddr.idx] <= next_valid2;
 			end
@@ -393,6 +393,7 @@ module dcache (
 					next_link_valid = 1;
 				end
 				if(dcif.dhit) begin
+					//if (!dcif.datomic)
 					next_hitcount = hitcount + 1;
 					if ((tag1[daddr.idx] == daddr.tag) && valid1[daddr.idx]) begin
 						dcif.dmemload = block1[daddr.blkoff][daddr.idx];

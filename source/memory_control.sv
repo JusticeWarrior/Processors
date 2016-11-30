@@ -37,9 +37,16 @@ module memory_control (
 	StateType state;
 	StateType nextState;
 
+	always_ff @(posedge CLK, negedge nRST) begin
+			if (nRST == 0)
+					state <= WAIT;
+			else
+					state <= nextState;
+	end
+
 	always_comb begin
 			 nextState = state;
-			 case(state)
+			 casez(state)
 					WAIT : begin
 							if ( (ccif.cctrans[0] && !ccif.ccwrite[0]) || (ccif.cctrans[1] && !ccif.ccwrite[1]) )
 									nextState = READ1;
@@ -70,13 +77,6 @@ module memory_control (
 			endcase
 	end
 
-	always_ff @(posedge CLK, negedge nRST) begin
-			if (nRST == 0)
-					state <= WAIT;
-			else
-					state <= nextState;
-	end
-
 	always_comb begin
 			ccif.ccwait[0] = '0;
 			ccif.ccwait[1] = '0;
@@ -88,7 +88,7 @@ module memory_control (
 			cocodload[0] = ccif.dstore[0];
 			cocodload[1] = ccif.dstore[1];
 
-			case(state)
+			casez(state)
 					WAIT: begin
 						if (ccif.cctrans[0])
 							ccif.ccwait[1] = 1;
@@ -106,7 +106,7 @@ module memory_control (
 								cocodload[0] = ccif.dstore[1];
 								//ccif.dwait[0] = 0;
 							end
-						end else begin
+						end else if (ccif.cctrans[1]) begin
 							ccif.ccwait[0] = 1;
 							ccif.ccsnoopaddr[0] = ccif.daddr[1];
 
@@ -128,7 +128,7 @@ module memory_control (
 								cocodload[0] = ccif.dstore[1];
 								//ccif.dwait[0] = 0;
 							end
-						end else begin
+						end else if (ccif.cctrans[1]) begin
 							ccif.ccwait[0] = 1;
 							ccif.ccsnoopaddr[0] = ccif.daddr[1];
 
@@ -145,7 +145,7 @@ module memory_control (
 							ccif.ccwait[1] = 1;
 							ccif.ccsnoopaddr[1] = ccif.daddr[0];
 							ccif.ccinv[1] = 1;
-						end else begin
+						end else if (ccif.cctrans[1]) begin
 							ccif.ccwait[0] = 1;
 							ccif.ccsnoopaddr[0] = ccif.daddr[1];
 							ccif.ccinv[0] = 1;
@@ -157,7 +157,7 @@ module memory_control (
 							ccif.ccwait[1] = 1;
 							ccif.ccsnoopaddr[1] = ccif.daddr[0];
 							ccif.ccinv[1] = 1;
-						end else begin
+						end else if (ccif.cctrans[1]) begin
 							ccif.ccwait[0] = 1;
 							ccif.ccsnoopaddr[0] = ccif.daddr[1];
 							ccif.ccinv[0] = 1;
