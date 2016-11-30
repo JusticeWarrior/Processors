@@ -26,6 +26,7 @@ module execute_latch (
 			elif.out_dWEN <= 0;
 			elif.out_wsel <= 0;
 			elif.out_jaddr <= 0;
+			elif.out_datomic <= 0;
 		end
 		else begin
 			if(elif.flush && elif.en) begin
@@ -45,6 +46,7 @@ module execute_latch (
 				elif.out_dWEN <= 0;
 				elif.out_wsel <= 0;
 				elif.out_jaddr <= 0;
+				elif.out_datomic <= 0;
 			end
 			else if(elif.en) begin
 				elif.out_pc_plus_4 <= elif.pc_plus_4;
@@ -63,6 +65,7 @@ module execute_latch (
 				elif.out_dWEN <= elif.dWEN;
 				elif.out_wsel <= elif.wsel;
 				elif.out_jaddr <= elif.jaddr;
+				elif.out_datomic <= elif.datomic;
 			end
 			else begin
 				elif.out_pc_plus_4 <= elif.out_pc_plus_4;
@@ -81,6 +84,7 @@ module execute_latch (
 				elif.out_dWEN <= elif.out_dWEN;
 				elif.out_wsel <= elif.out_wsel;
 				elif.out_jaddr <= elif.out_jaddr;
+				elif.out_datomic <= elif.out_datomic;
 				if (elif.dhit) begin
 					elif.out_dREN <= '0;
 					elif.out_dWEN <= '0;

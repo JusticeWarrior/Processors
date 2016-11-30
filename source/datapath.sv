@@ -108,6 +108,7 @@ module datapath (
 	assign dlif.Rt = cuif.Rt;
 	assign dlif.rsel1 = cuif.Rs;
 	assign dlif.rsel2 = cuif.Rt;
+	assign dlif.datomic = cuif.datomic;
 
 	//ALU conns
 	assign aluif.ALUOP = dlif.out_ALUop;
@@ -159,6 +160,7 @@ module datapath (
 	assign elif.flush = bsel;
 	assign elif.en = en;
 	assign elif.dhit = dpif.dhit;
+	assign elif.datomic = dlif.out_datomic;
 
 	//memory register conns
 	assign mlif.pc_plus_4 = elif.out_pc_plus_4;
@@ -211,5 +213,6 @@ module datapath (
 	assign dpif.dmemWEN = elif.out_dWEN & !mlif.out_halt;
 	assign dpif.dmemstore = elif.out_rdat2;
 	assign dpif.dmemaddr = elif.out_portout;
+	assign dpif.datomic = elif.out_datomic;
 
 endmodule

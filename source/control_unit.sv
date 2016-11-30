@@ -30,14 +30,15 @@ module control_unit (
 	assign C.imm16 = op == RTYPE && (funct == SLL || funct == SRL) ? {11'd0, shamt} : C.Instr[15:0];
 	assign C.branch = op == BEQ ? '1 : '0;
 	assign C.bne = op == BNE ? '1 : '0;
+	assign C.datomic = op == LL || op == SC ? '1 : '0;
 
 	always_comb begin
 		C.PCSrc = op == BEQ || op == BNE ? '1 : '0;
 
 		C.ALUSrc = (op == RTYPE && funct != SLL && funct != SRL) || op == BEQ || op == BNE ? '0 : '1;
-		C.MemWr = op == SW ? '1 : '0;
-		C.MemRd = op == LW ? '1 : '0;
-		C.MemtoReg = op == LW ? '1 : '0;
+		C.MemWr = op == SW || op == SC ? '1 : '0;
+		C.MemRd = op == LW || op == LL ? '1 : '0;
+		C.MemtoReg = op == LW || op == LL || op == SC ? '1 : '0;
 		C.RegDst = op == RTYPE || op == JAL ? '0 : '1;
 		C.Jmp = op == J ? '1 : '0;
 		C.JAL = op == JAL ? '1 : '0;
@@ -117,10 +118,13 @@ module control_unit (
 		end else if (op == LUI) begin
 			C.ALUCtr = ALU_ADD;
 			C.RegWr = '1;
-		end else if (op == LW) begin
+		end else if (op == LW || op == LL) begin
 			C.ALUCtr = ALU_ADD;
 			C.RegWr = '1;
-		end else if (op == SW) begin
+		end else if (op == SW || op == SC) begin
+			if (op == SC) begin
+				C.RegWr = '1;
+			end
 			C.ALUCtr = ALU_ADD;
 		end else if (op == BEQ || op == BNE) begin
 			C.ALUCtr = ALU_SUB;
@@ -146,9 +150,9 @@ module control_unit (
 			C.ExtOp = '0;
 		else if (op == LUI)
 			C.Upper = '1;
-		else if (op == LW)
+		else if (op == LW || op == LL)
 			C.ExtOp = '1;
-		else if (op == SW)
+		else if (op == SW || op == SC)
 			C.ExtOp = '1;
 		else if (op == BEQ)
 			C.ExtOp = '1;

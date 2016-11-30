@@ -31,6 +31,7 @@ module decode_latch (
 			dlif.out_JAL <= 0;
 			dlif.out_rsel1 <= 0;
 			dlif.out_rsel2 <= 0;
+			dlif.out_datomic <= 0;
 		end
 		else begin
 			if(dlif.flush && dlif.en) begin
@@ -55,6 +56,7 @@ module decode_latch (
 				dlif.out_JAL <= 0;
 				dlif.out_rsel1 <= 0;
 				dlif.out_rsel2 <= 0;
+				dlif.out_datomic <= 0;
 			end
 			else if(dlif.en) begin
 				dlif.out_pc_plus_4 <= dlif.pc_plus_4;
@@ -78,6 +80,7 @@ module decode_latch (
 				dlif.out_JAL <= dlif.JAL;
 				dlif.out_rsel1 <= dlif.rsel1;
 				dlif.out_rsel2 <= dlif.rsel2;
+				dlif.out_datomic <= dlif.datomic;
 			end
 			else begin
 				dlif.out_pc_plus_4 <= dlif.out_pc_plus_4;
@@ -101,6 +104,7 @@ module decode_latch (
 				dlif.out_JAL <= dlif.out_JAL;
 				dlif.out_rsel1 <= dlif.out_rsel1;
 				dlif.out_rsel2 <= dlif.out_rsel2;
+				dlif.out_datomic <= dlif.out_datomic;
 			end
 		end
 	end
