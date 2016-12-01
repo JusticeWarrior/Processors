@@ -394,7 +394,7 @@ module dcache (
 				end
 				if(dcif.dhit) begin
 					//if (!dcif.datomic)
-					next_hitcount = hitcount + 1;
+					//next_hitcount = hitcount + 1;
 					if ((tag1[daddr.idx] == daddr.tag) && valid1[daddr.idx]) begin
 						dcif.dmemload = block1[daddr.blkoff][daddr.idx];
 						next_lru1 = 0;
@@ -432,7 +432,7 @@ module dcache (
 								next_link_out = 1;
 							end
 						end
-						next_hitcount = hitcount + 1;
+						//next_hitcount = hitcount + 1;
 						if ((tag1[daddr.idx] == daddr.tag) && valid1[daddr.idx]) begin
 							next_lru1 = 0;
 							next_lru2 = 1;
