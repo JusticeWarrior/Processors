@@ -1,2 +1,3 @@
 # Processors
-Hardware design of several processors ranging from a single cycle, to a pipelined, to a mult-core.
+Hardware design of several processors ranging from single cycle, to pipelined, to multicore.
+Each branch contains a different processor.
